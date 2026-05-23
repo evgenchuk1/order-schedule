@@ -183,6 +183,16 @@
     .mbtn-ok{background:#27AE60;color:#fff;}
     .mbtn-snooze{background:#F0F4F8;color:#555;font-size:13px;padding:12px;}
 
+    /* ─── Toast (replaces alert() — blocked in iOS PWA standalone) ─── */
+    .toast{
+      position:fixed;bottom:32px;left:50%;transform:translateX(-50%);
+      background:rgba(20,20,20,.92);color:#fff;padding:13px 22px;
+      border-radius:16px;font-size:15px;z-index:3000;
+      max-width:88%;text-align:center;line-height:1.5;pointer-events:none;
+      animation:toastIn .2s ease;
+    }
+    @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(8px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+
     /* ─── Setup tip ─── */
     .tip{
       background:#EAF4FD;border-radius:14px;padding:13px 15px;
@@ -470,7 +480,11 @@ function toggle(id){
 //  AUDIO
 // ═══════════════════════════════════════════
 function unlockAudio(){
-  if(audioUnlocked) return;
+  if(audioUnlocked){
+    // Resume if iOS suspended the context after backgrounding
+    if(audioCtx && audioCtx.state==='suspended') audioCtx.resume();
+    return;
+  }
   try{
     audioCtx=new(window.AudioContext||window.webkitAudioContext)();
     const buf=audioCtx.createBuffer(1,1,22050);
@@ -501,6 +515,10 @@ function playTick(){
 
 function playAlarm(){
   if(!audioCtx) return;
+  if(audioCtx.state==='suspended'){
+    audioCtx.resume().then(()=>playAlarm());
+    return;
+  }
   const ctx=audioCtx, t=ctx.currentTime;
 
   // 1. ominous low drone
@@ -688,19 +706,27 @@ OneSignalDeferred.push(async function(OneSignal) {
   OneSignal.User.PushSubscription.addEventListener('change', updateBell);
 });
 
+function showToast(msg,dur=3500){
+  const el=document.createElement('div');
+  el.className='toast';
+  el.textContent=msg;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),dur);
+}
+
 async function handleBell() {
   unlockAudio();
   if (!window.OneSignal) {
-    alert('OneSignal לא טען — נסה לרענן את הדף');
+    showToast('OneSignal לא טען — נסה לרענן את הדף');
     return;
   }
   const isOn = OneSignal.User.PushSubscription.optedIn;
   if (!isOn) {
     await OneSignal.Notifications.requestPermission();
     const now = OneSignal.User.PushSubscription.optedIn;
-    if (now) alert('✅ התראות פעילות!\nתקבל אותן גם כשהאפליקציה סגורה.');
+    if (now) showToast('✅ התראות פעילות! תקבל אותן גם כשהאפליקציה סגורה.');
   } else {
-    alert('🔔 התראות כבר פעילות.\nלביטול: הגדרות iPhone → Safari → התראות → כבה עבור האתר.');
+    showToast('🔔 התראות פעילות. לביטול: הגדרות → Safari → התראות → כבה', 5000);
   }
 }
 
@@ -722,7 +748,7 @@ function testAlarmNow(){
   const today=new Date().getDay();
   const items=(SCH[today]||[]).filter(x=>!isDone(x.id)&&x.dl);
   if(items.length===0){
-    alert('אין הזמנות ממתינות להיום (או הכל סומן כהושלם).\nעבור לשבת כדי לבדוק את הפרארי 🏎️');
+    showToast('אין הזמנות ממתינות להיום. עבור לשבת לבדיקה 🏎️');
     return;
   }
   showAlarm(items);
