@@ -10,6 +10,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
   <title>לוז הזמנות סחורה</title>
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
     :root{
@@ -627,24 +628,38 @@ function dismissAlarm(){
 }
 
 // ═══════════════════════════════════════════
-//  NOTIFICATIONS PERMISSION
+//  ONESIGNAL — PUSH NOTIFICATIONS (background-capable)
 // ═══════════════════════════════════════════
-async function handleBell(){
+window.OneSignalDeferred = window.OneSignalDeferred || [];
+OneSignalDeferred.push(async function(OneSignal) {
+  await OneSignal.init({
+    appId: 'acf60cd7-d10c-49d7-a379-e0d833299bd4',
+    serviceWorkerPath: 'sw.js',
+    serviceWorkerParam: { scope: './' },
+    notifyButton: { enable: false },
+  });
+
+  function updateBell() {
+    const on = OneSignal.User.PushSubscription.optedIn;
+    document.getElementById('bellBtn').textContent = on ? '🔔' : '🔕';
+  }
+  updateBell();
+  OneSignal.User.PushSubscription.addEventListener('change', updateBell);
+});
+
+async function handleBell() {
   unlockAudio();
-  if(!('Notification'in window)){
-    alert('הדפדפן אינו תומך בהתראות. נסה להוסיף לאפליקציה למסך הבית.');
+  if (!window.OneSignal) {
+    alert('OneSignal לא טען — נסה לרענן את הדף');
     return;
   }
-  if(Notification.permission==='denied'){
-    alert('ההתראות חסומות. אפשר ב: הגדרות → הדפדפן → התראות');
-    return;
-  }
-  const p=await Notification.requestPermission();
-  if(p==='granted'){
-    document.getElementById('bellBtn').textContent='🔔';
-    new Notification('התראות הופעלו ✅',{body:'תקבל התראה לפני כל הזמנה',icon:'icon-192.png'});
+  const isOn = OneSignal.User.PushSubscription.optedIn;
+  if (!isOn) {
+    await OneSignal.Notifications.requestPermission();
+    const now = OneSignal.User.PushSubscription.optedIn;
+    if (now) alert('✅ התראות פעילות!\nתקבל אותן גם כשהאפליקציה סגורה.');
   } else {
-    document.getElementById('bellBtn').textContent='🔕';
+    alert('🔔 התראות כבר פעילות.\nלביטול: הגדרות iPhone → Safari → התראות → כבה עבור האתר.');
   }
 }
 

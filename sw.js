@@ -1,4 +1,7 @@
-const CACHE = 'order-v2';
+// OneSignal push support — must be first
+importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
+
+const CACHE = 'order-v3';
 const FILES = ['./index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -18,20 +21,6 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request))
-  );
-});
-
-self.addEventListener('push', e => {
-  const d = e.data ? e.data.json() : {};
-  e.waitUntil(
-    self.registration.showNotification(d.title || 'הזמנות סחורה ⏰', {
-      body: d.body || 'הגיע זמן לבצע הזמנה!',
-      icon: './icon-192.png',
-      badge: './icon-192.png',
-      tag: 'order',
-      requireInteraction: true,
-      vibrate: [200, 100, 200, 100, 400],
-    })
   );
 });
 
