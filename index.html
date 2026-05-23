@@ -281,10 +281,10 @@ const SCH = {
     {id:'s5a',nm:'שוהם ירקות',           dl:'09:00',nt:'',ic:'🥦',cl:'teal'},
     {id:'s5b',nm:'ירקות Green יבולי בר', dl:'10:00',nt:'',ic:'🌿',cl:'green'},
   ],
-  6:[ // שבת — בדיקה
-    {id:'s6a',nm:'הזמנת מכוניות פרארי',  dl:'21:00',nt:'בדיקה',ic:'🏎️',cl:'red'},
-    {id:'s6b',nm:'הזמנת אופנועי קוואסאקי',dl:'22:00',nt:'בדיקה',ic:'🏍️',cl:'coral'},
-    {id:'s6c',nm:'הזמנת מכוניות בנטלי',  dl:'23:00',nt:'בדיקה',ic:'🚘',cl:'purple'},
+  6:[ // שבת — בדיקה (כולל מעבר חצות)
+    {id:'s6a',nm:'הזמנת מכוניות פרארי',    dl:'23:00',nt:'בדיקה',       ic:'🏎️',cl:'red'},
+    {id:'s6b',nm:'הזמנת מכוניות בנטלי',   dl:'00:00',nt:'בדיקה — חצות',ic:'🚘', cl:'purple'},
+    {id:'s6c',nm:'הזמנת מכוניות רולס רויס',dl:'01:00',nt:'בדיקה — ראשון',ic:'🚙',cl:'amber'},
   ],
 };
 
@@ -322,10 +322,19 @@ function isDone(id){return !!getDone()[id];}
 function toMin(s){if(!s)return null;const[h,m]=s.split(':').map(Number);return h*60+m;}
 function nowMin(){const n=new Date();return n.getHours()*60+n.getMinutes();}
 
+// If deadline is early next morning (00:00-03:00) and it's currently evening (after 20:00),
+// treat it as next-day time so diff calculations are correct across midnight.
+function effectiveDl(dlStr){
+  const dl=toMin(dlStr);
+  const now=nowMin();
+  if(dl<=180 && now>=1200) return dl+1440;
+  return dl;
+}
+
 function itemStatus(item){
   if(isDone(item.id)) return 'done';
   if(!item.dl) return 'none';
-  const d=toMin(item.dl),n=nowMin(),diff=d-n;
+  const d=effectiveDl(item.dl),n=nowMin(),diff=d-n;
   if(diff<0)   return 'over';
   if(diff<=30) return 'hot';
   if(diff<=60) return 'warn';
@@ -491,16 +500,48 @@ function playTick(){
 }
 
 function playAlarm(){
-  // urgent 3-tone pattern
-  beep(880,.18,'square',.3);
-  setTimeout(()=>beep(880,.18,'square',.3),280);
-  setTimeout(()=>beep(1100,.35,'square',.3),560);
+  if(!audioCtx) return;
+  const ctx=audioCtx, t=ctx.currentTime;
+
+  // 1. ominous low drone
+  const drone=ctx.createOscillator();
+  const dg=ctx.createGain();
+  drone.type='sawtooth';
+  drone.frequency.setValueAtTime(55,t);
+  drone.frequency.exponentialRampToValueAtTime(95,t+0.7);
+  dg.gain.setValueAtTime(0,t);
+  dg.gain.linearRampToValueAtTime(0.38,t+0.08);
+  dg.gain.exponentialRampToValueAtTime(0.001,t+0.9);
+  drone.connect(dg);dg.connect(ctx.destination);
+  drone.start(t);drone.stop(t+0.9);
+
+  // 2. rapid sharp stabs
+  [0.25,0.38,0.52,0.66].forEach((d,i)=>{
+    const o=ctx.createOscillator(), g=ctx.createGain();
+    o.type='square';
+    o.frequency.value=1300+i*250;
+    g.gain.setValueAtTime(0.5,t+d);
+    g.gain.exponentialRampToValueAtTime(0.001,t+d+0.11);
+    o.connect(g);g.connect(ctx.destination);
+    o.start(t+d);o.stop(t+d+0.13);
+  });
+
+  // 3. rising horror siren
+  const siren=ctx.createOscillator();
+  const sg=ctx.createGain();
+  siren.type='sine';
+  siren.frequency.setValueAtTime(180,t+0.85);
+  siren.frequency.exponentialRampToValueAtTime(1400,t+1.9);
+  sg.gain.setValueAtTime(0.38,t+0.85);
+  sg.gain.exponentialRampToValueAtTime(0.001,t+2.1);
+  siren.connect(sg);sg.connect(ctx.destination);
+  siren.start(t+0.85);siren.stop(t+2.1);
 }
 
 function startAlarmLoop(){
   stopAlarmLoop();
   playAlarm();
-  alarmLoopId=setInterval(playAlarm,2800);
+  alarmLoopId=setInterval(playAlarm,3200);
 }
 function stopAlarmLoop(){
   if(alarmLoopId){clearInterval(alarmLoopId);alarmLoopId=null;}
@@ -520,7 +561,7 @@ function checkTriggers(){
 
   for(const item of items){
     if(isDone(item.id)||!item.dl) continue;
-    const dl=toMin(item.dl);
+    const dl=effectiveDl(item.dl);
     const diff=dl-n; // positive = time remaining
 
     // Check standard remind points
@@ -560,7 +601,7 @@ function checkMissed(){
   const missed=[];
   for(const item of items){
     if(isDone(item.id)||!item.dl) continue;
-    const dl=toMin(item.dl);
+    const dl=effectiveDl(item.dl);
     if(dl-n<=0) missed.push(item);
   }
   if(missed.length>0){
