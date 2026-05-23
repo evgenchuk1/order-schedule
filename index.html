@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="הזמנות">
+  <meta name="theme-color" content="#1B4F72">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <title>לוז הזמנות סחורה</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    :root{
+      --blue:#1B4F72;--blue2:#2980B9;
+      --green-bg:#EAF3DE;--green-b:#7DBE44;--green-t:#27500A;
+      --teal-bg:#E1F5EE;--teal-b:#5DCAA5;--teal-t:#085041;
+      --blue-bg:#E6F1FB;--blue-b:#85B7EB;--blue-t:#0C447C;
+      --purple-bg:#EEEDFE;--purple-b:#AFA9EC;--purple-t:#26215C;
+      --coral-bg:#FAECE7;--coral-b:#F0997B;--coral-t:#4A1B0C;
+      --amber-bg:#FAEEDA;--amber-b:#EF9F27;--amber-t:#633806;
+      --red-bg:#FCEBEB;--red-b:#F09595;--red-t:#501313;
+      --pink-bg:#FBEAF0;--pink-b:#ED93B1;--pink-t:#4B1528;
+    }
+    html,body{height:100%;overflow:hidden;}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+      background:#F0F4F8;
+      display:flex;flex-direction:column;
+      padding-top:env(safe-area-inset-top);
+    }
+
+    /* ─── Header ─── */
+    .hdr{
+      background:linear-gradient(135deg,var(--blue),var(--blue2));
+      color:#fff;
+      padding:12px 16px 10px;
+      display:flex;align-items:center;justify-content:space-between;
+      flex-shrink:0;
+      box-shadow:0 2px 8px rgba(0,0,0,.25);
+      z-index:10;
+    }
+    .hdr-title{font-size:17px;font-weight:700;line-height:1.2;}
+    .hdr-date{font-size:12px;opacity:.8;margin-top:2px;}
+    .bell{
+      background:rgba(255,255,255,.18);border:none;border-radius:50%;
+      width:40px;height:40px;font-size:20px;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+      transition:background .2s;flex-shrink:0;
+    }
+    .bell:active{background:rgba(255,255,255,.35);}
+
+    /* ─── Day tabs ─── */
+    .tabs{
+      display:flex;overflow-x:auto;scrollbar-width:none;
+      background:#fff;border-bottom:2px solid #E8EDF2;
+      flex-shrink:0;z-index:9;
+    }
+    .tabs::-webkit-scrollbar{display:none;}
+    .tab{
+      flex:0 0 auto;padding:11px 15px 9px;
+      font-size:13px;font-weight:600;color:#888;cursor:pointer;
+      border-bottom:3px solid transparent;white-space:nowrap;
+      transition:color .15s;position:relative;user-select:none;
+    }
+    .tab.active{color:var(--blue);border-bottom-color:var(--blue);}
+    .tab.today{color:#C0392B;}
+    .tab.today.active{color:#C0392B;border-bottom-color:#C0392B;}
+    .badge{
+      display:inline-flex;align-items:center;justify-content:center;
+      background:#E74C3C;color:#fff;border-radius:9px;
+      font-size:10px;min-width:17px;height:17px;padding:0 4px;
+      margin-right:4px;vertical-align:middle;font-weight:700;
+    }
+
+    /* ─── Scroll area ─── */
+    .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+    .container{padding:14px;max-width:520px;margin:0 auto;}
+
+    /* ─── Progress ─── */
+    .prog{
+      background:#fff;border-radius:14px;padding:13px 16px;
+      margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.07);
+    }
+    .prog-label{font-size:12px;color:#888;margin-bottom:7px;display:flex;justify-content:space-between;}
+    .prog-bar{height:8px;background:#EDF2F7;border-radius:4px;overflow:hidden;}
+    .prog-fill{height:100%;background:linear-gradient(90deg,#27AE60,#2ECC71);
+      border-radius:4px;transition:width .6s ease;will-change:width;}
+    .prog-done{margin-top:5px;font-size:12px;color:#27AE60;font-weight:600;}
+
+    /* ─── Order cards ─── */
+    .card{
+      background:#fff;border-radius:14px;padding:12px 14px;
+      margin-bottom:9px;display:flex;align-items:center;gap:11px;
+      box-shadow:0 1px 3px rgba(0,0,0,.07);
+      border-right:4px solid #ddd;
+      transition:opacity .3s,transform .2s;position:relative;
+      cursor:default;
+    }
+    .card.c-green{border-right-color:var(--green-b);}
+    .card.c-teal{border-right-color:var(--teal-b);}
+    .card.c-blue{border-right-color:var(--blue-b);}
+    .card.c-purple{border-right-color:var(--purple-b);}
+    .card.c-coral{border-right-color:var(--coral-b);}
+    .card.c-amber{border-right-color:var(--amber-b);}
+    .card.c-red{border-right-color:var(--red-b);}
+    .card.c-pink{border-right-color:var(--pink-b);}
+
+    .card.done{opacity:.42;}
+    .card.done .cname{text-decoration:line-through;color:#aaa;}
+
+    .card.urgent:not(.done){
+      border-right-color:#E74C3C!important;
+      background:#FFF5F5;
+      animation:pulseBorder 1.8s infinite;
+    }
+    .card.warning:not(.done){
+      border-right-color:#E67E22!important;
+      background:#FFFBF5;
+    }
+    @keyframes pulseBorder{
+      0%{box-shadow:0 1px 3px rgba(231,76,60,.15);}
+      50%{box-shadow:0 3px 18px rgba(231,76,60,.45);}
+      100%{box-shadow:0 1px 3px rgba(231,76,60,.15);}
+    }
+
+    .cicon{font-size:26px;flex-shrink:0;width:32px;text-align:center;}
+    .cinfo{flex:1;min-width:0;}
+    .cname{font-size:14px;font-weight:600;color:#1a1a2e;line-height:1.3;}
+    .cmeta{font-size:11px;color:#999;margin-top:3px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+
+    .dl{
+      display:inline-flex;align-items:center;gap:3px;
+      border-radius:8px;padding:2px 7px;font-size:11px;font-weight:700;
+    }
+    .dl.ok{background:#D5F5E3;color:#1E8449;}
+    .dl.warn{background:#FDECD0;color:#D35400;}
+    .dl.hot{background:#FDEBD0;color:#BA4A00;}
+    .dl.over{background:#FDEDEC;color:#C0392B;}
+
+    .chk{
+      width:34px;height:34px;border-radius:50%;
+      border:2.5px solid #D5D8DC;background:#fff;
+      cursor:pointer;display:flex;align-items:center;justify-content:center;
+      font-size:17px;flex-shrink:0;
+      transition:background .2s,border-color .2s,transform .15s;
+      -webkit-user-select:none;user-select:none;
+    }
+    .chk:active{transform:scale(.88);}
+    .chk.checked{background:#27AE60;border-color:#27AE60;color:#fff;}
+
+    .empty{text-align:center;padding:50px 20px;color:#BCC0C5;font-size:15px;}
+
+    /* ─── Alarm overlay ─── */
+    .overlay{
+      display:none;position:fixed;inset:0;
+      background:rgba(0,0,0,.72);z-index:1000;
+      align-items:center;justify-content:center;padding:20px;
+    }
+    .overlay.on{display:flex;}
+    .modal{
+      background:#fff;border-radius:22px;padding:26px 22px;
+      max-width:340px;width:100%;text-align:center;
+      animation:popIn .25s ease;
+    }
+    @keyframes popIn{from{transform:scale(.88);opacity:0;}to{transform:scale(1);opacity:1;}}
+    .m-icon{font-size:52px;margin-bottom:10px;}
+    .m-title{font-size:21px;font-weight:800;color:#1a1a2e;margin-bottom:5px;}
+    .m-sub{font-size:13px;color:#E74C3C;font-weight:600;margin-bottom:16px;}
+    .m-items{background:#F8F9FA;border-radius:12px;padding:10px 12px;margin-bottom:18px;text-align:right;}
+    .m-item{padding:7px 0;border-bottom:1px solid #EEE;font-size:13px;line-height:1.4;}
+    .m-item:last-child{border-bottom:none;}
+    .m-item strong{color:#1a1a2e;}
+    .m-item small{color:#E74C3C;font-weight:600;}
+    .mbtn{
+      width:100%;padding:14px;border:none;border-radius:13px;
+      font-size:15px;font-weight:700;cursor:pointer;margin-bottom:9px;
+      transition:opacity .15s;
+    }
+    .mbtn:active{opacity:.8;}
+    .mbtn-ok{background:#27AE60;color:#fff;}
+    .mbtn-snooze{background:#F0F4F8;color:#555;font-size:13px;padding:12px;}
+
+    /* ─── Setup tip ─── */
+    .tip{
+      background:#EAF4FD;border-radius:14px;padding:13px 15px;
+      margin-top:6px;margin-bottom:14px;font-size:12px;color:#2471A3;
+      border-right:3px solid #2471A3;
+    }
+    .tip b{display:block;margin-bottom:4px;font-size:13px;}
+    .tip ol{padding-right:16px;margin-top:5px;}
+    .tip ol li{margin-bottom:3px;}
+  </style>
+</head>
+<body>
+
+<div class="hdr">
+  <div>
+    <div class="hdr-title">📋 לוז הזמנות סחורה</div>
+    <div class="hdr-date" id="hdrDate"></div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <button class="bell" id="testBtn" title="בדוק עכשיו" onclick="testAlarmNow()" style="font-size:15px;background:rgba(231,76,60,.35);">🧪</button>
+    <button class="bell" id="bellBtn" title="התראות" onclick="handleBell()">🔔</button>
+  </div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="scroll">
+  <div class="container" id="container"></div>
+</div>
+
+<!-- Alarm modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="m-icon">⏰</div>
+    <div class="m-title">תזכורת הזמנה!</div>
+    <div class="m-sub" id="mSub"></div>
+    <div class="m-items" id="mItems"></div>
+    <button class="mbtn mbtn-ok" onclick="doneAlarmItems()">✓ סמן כהוזמן</button>
+    <button class="mbtn mbtn-snooze" onclick="snoozeAlarm()">⏱ תזכיר שוב בעוד 10 דקות</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════
+const DAYS = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+
+const SCH = {
+  0:[ // ראשון
+    {id:'s0a',nm:'מודיעין מכולת / Green',dl:'12:00',nt:'',ic:'🥫',cl:'green'},
+    {id:'s0b',nm:'שוהם ירקות',          dl:'10:00',nt:'',ic:'🥦',cl:'teal'},
+    {id:'s0c',nm:'פארם',                 dl:'12:00',nt:'',ic:'💊',cl:'purple'},
+    {id:'s0d',nm:'עופות',                dl:'09:00',nt:'',ic:'🐔',cl:'coral'},
+    {id:'s0e',nm:'שוהם מצוננים',         dl:'10:00',nt:"הספקה ב'",ic:'🧀',cl:'blue'},
+    {id:'s0f',nm:'קוקה קולה',            dl:null,  nt:"הספקה ג'",ic:'🥤',cl:'red'},
+    {id:'s0g',nm:'טמפו',                 dl:null,  nt:"הספקה מה'",ic:'🧃',cl:'amber'},
+    {id:'s0h',nm:'יפאורה',               dl:null,  nt:"הספקה מה'",ic:'🍵',cl:'pink'},
+  ],
+  1:[ // שני
+    {id:'s1a',nm:'שוהם ירקות',           dl:'10:00',nt:'',ic:'🥦',cl:'teal'},
+    {id:'s1b',nm:'עופות',                dl:'09:00',nt:'',ic:'🐔',cl:'coral'},
+    {id:'s1c',nm:'רשל"ץ כלי ניקיון',    dl:'12:00',nt:'',ic:'🧹',cl:'blue'},
+    {id:'s1d',nm:'משוקלדים',             dl:'12:00',nt:'',ic:'🍫',cl:'amber'},
+    {id:'s1e',nm:'יפאורה',               dl:null,  nt:"הספקה ד'",ic:'🍵',cl:'pink'},
+  ],
+  2:[ // שלישי
+    {id:'s2a',nm:'מודיעין מכולת / Green',dl:'12:00',nt:'',ic:'🥫',cl:'green'},
+    {id:'s2b',nm:'שוהם ירקות',           dl:'10:00',nt:'',ic:'🥦',cl:'teal'},
+    {id:'s2c',nm:'רשל"ץ כלי ניקיון',    dl:'12:00',nt:'',ic:'🧹',cl:'blue'},
+    {id:'s2d',nm:'פארם',                 dl:'12:00',nt:'',ic:'💊',cl:'purple'},
+    {id:'s2e',nm:'עופות',                dl:'09:00',nt:'',ic:'🐔',cl:'coral'},
+    {id:'s2f',nm:'משוקלדים',             dl:'12:00',nt:'',ic:'🍫',cl:'amber'},
+    {id:'s2g',nm:'קוקה קולה',            dl:null,  nt:"הספקה ה'",ic:'🥤',cl:'red'},
+    {id:'s2h',nm:'מאפית',                dl:'13:00',nt:"הספקה ה'",ic:'☕',cl:'amber'},
+    {id:'s2i',nm:'טמפו',                 dl:null,  nt:"הספקה ד'",ic:'🧃',cl:'amber'},
+  ],
+  3:[ // רביעי
+    {id:'s3a',nm:'מודיעין מכולת / Green',dl:'12:00',nt:'',ic:'🥫',cl:'green'},
+    {id:'s3b',nm:'שוהם ירקות',           dl:'10:00',nt:'',ic:'🥦',cl:'teal'},
+    {id:'s3c',nm:'רשל"ץ כלי ניקיון',    dl:'12:00',nt:'',ic:'🧹',cl:'blue'},
+    {id:'s3d',nm:'עופות',                dl:'09:00',nt:'',ic:'🐔',cl:'coral'},
+    {id:'s3e',nm:'משוקלדים',             dl:'12:00',nt:'',ic:'🍫',cl:'amber'},
+    {id:'s3f',nm:'שוהם מצוננים',         dl:'10:00',nt:"הספקה א'",ic:'🧀',cl:'blue'},
+    {id:'s3g',nm:'יפאורה',               dl:null,  nt:"הספקה א'",ic:'🍵',cl:'pink'},
+  ],
+  4:[ // חמישי
+    {id:'s4a',nm:'מודיעין מכולת / Green',dl:'12:00',nt:'',ic:'🥫',cl:'green'},
+    {id:'s4b',nm:'רשל"ץ כלי ניקיון',    dl:'12:00',nt:'',ic:'🧹',cl:'blue'},
+    {id:'s4c',nm:'פארם',                 dl:'12:00',nt:'',ic:'💊',cl:'purple'},
+    {id:'s4d',nm:'משוקלדים',             dl:'12:00',nt:'',ic:'🍫',cl:'amber'},
+    {id:'s4e',nm:'מאפית',                dl:'13:00',nt:"הספקה ב'",ic:'☕',cl:'amber'},
+    {id:'s4f',nm:'טמפו',                 dl:null,  nt:"הספקה א'",ic:'🧃',cl:'amber'},
+  ],
+  5:[ // שישי
+    {id:'s5a',nm:'שוהם ירקות',           dl:'09:00',nt:'',ic:'🥦',cl:'teal'},
+    {id:'s5b',nm:'ירקות Green יבולי בר', dl:'10:00',nt:'',ic:'🌿',cl:'green'},
+  ],
+  6:[ // שבת
+    {id:'s6a',nm:'הזמנת מכוניות פרארי 🏎️',dl:'19:00',nt:'בדיקה בלבד',ic:'🏎️',cl:'red'},
+  ],
+};
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let VIEW_DAY = new Date().getDay();
+let audioUnlocked = false;
+let audioCtx = null;
+let alarmLoopId = null;
+let snoozeId = null;
+let alarmItems = [];
+const firedAlarms = new Set(); // "id:reminderType" already fired today
+
+// ═══════════════════════════════════════════
+//  STORAGE
+// ═══════════════════════════════════════════
+function dayKey(){
+  const d=new Date();
+  return `done_${d.getFullYear()}_${d.getMonth()}_${d.getDate()}`;
+}
+function getDone(){
+  try{return JSON.parse(localStorage.getItem(dayKey())||'{}');}catch{return{};}
+}
+function setDone(id,v){
+  const o=getDone();
+  if(v) o[id]=1; else delete o[id];
+  localStorage.setItem(dayKey(),JSON.stringify(o));
+}
+function isDone(id){return !!getDone()[id];}
+
+// ═══════════════════════════════════════════
+//  TIME
+// ═══════════════════════════════════════════
+function toMin(s){if(!s)return null;const[h,m]=s.split(':').map(Number);return h*60+m;}
+function nowMin(){const n=new Date();return n.getHours()*60+n.getMinutes();}
+
+function itemStatus(item){
+  if(isDone(item.id)) return 'done';
+  if(!item.dl) return 'none';
+  const d=toMin(item.dl),n=nowMin(),diff=d-n;
+  if(diff<0)   return 'over';
+  if(diff<=30) return 'hot';
+  if(diff<=60) return 'warn';
+  return 'ok';
+}
+
+// ═══════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════
+function heDate(){
+  const d=new Date();
+  const months=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+  return `יום ${DAYS[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function renderTabs(){
+  const today=new Date().getDay();
+  const el=document.getElementById('tabs');
+  el.innerHTML='';
+  for(let i=0;i<7;i++){
+    const items=(SCH[i]||[]);
+    const pending=items.filter(x=>!isDone(x.id)&&x.dl).length;
+    const t=document.createElement('div');
+    t.className='tab'+(i===VIEW_DAY?' active':'')+(i===today?' today':'');
+    t.innerHTML=(i===today&&pending>0?`<span class="badge">${pending}</span>`:'')+DAYS[i];
+    t.onclick=()=>{VIEW_DAY=i;render();};
+    el.appendChild(t);
+  }
+  // Scroll active tab into view
+  setTimeout(()=>{
+    const active=el.querySelector('.tab.active');
+    if(active) active.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
+  },50);
+}
+
+function dlBadge(item,isToday){
+  if(!item.dl) return '';
+  const st=isToday?itemStatus(item):'ok';
+  if(st==='done') return `<span class="dl ok">✓ ${item.dl}</span>`;
+  const labels={ok:'ok',warn:'warn',hot:'hot',over:'over'};
+  const icons={ok:'⏱',warn:'⚠️',hot:'🔴',over:'🚨'};
+  const prefixes={ok:'עד ',warn:'עד ',hot:'עד ',over:'עבר! '};
+  const cls=labels[st]||'ok';
+  return `<span class="dl ${cls}">${icons[st]} ${prefixes[st]}${item.dl}</span>`;
+}
+
+function renderOrders(){
+  const today=new Date().getDay();
+  const isToday=VIEW_DAY===today;
+  const items=SCH[VIEW_DAY]||[];
+  const el=document.getElementById('container');
+  document.getElementById('hdrDate').textContent=heDate();
+
+  if(items.length===0){
+    el.innerHTML='<div class="empty">🕌<br>אין הזמנות ביום זה</div>';
+    return;
+  }
+
+  let html='';
+
+  // Progress bar (today only)
+  if(isToday){
+    const withDl=items.filter(x=>x.dl);
+    const doneDl=withDl.filter(x=>isDone(x.id));
+    const pct=withDl.length?Math.round(doneDl.length/withDl.length*100):0;
+    html+=`<div class="prog">
+      <div class="prog-label"><span>התקדמות היום</span><span>${doneDl.length}/${withDl.length}</span></div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
+      ${pct===100?'<div class="prog-done">✅ כל ההזמנות הושלמו לפי לוח הזמנים!</div>':''}
+    </div>`;
+  }
+
+  // Cards — pending first, done at bottom
+  const sorted=[...items].sort((a,b)=>{
+    const da=isDone(a.id)?1:0,db=isDone(b.id)?1:0;
+    return da-db;
+  });
+
+  for(const item of sorted){
+    const st=isToday?itemStatus(item):'none';
+    const done=isDone(item.id);
+    let extra='';
+    if(!done&&isToday){
+      if(st==='over'||st==='hot') extra=' urgent';
+      else if(st==='warn') extra=' warning';
+    }
+    const note=item.nt?`<span>${item.nt}</span>`:'';
+    html+=`<div class="card c-${item.cl}${done?' done':''}${extra}" id="card_${item.id}">
+      <span class="cicon">${item.ic}</span>
+      <div class="cinfo">
+        <div class="cname">${item.nm}</div>
+        <div class="cmeta">${dlBadge(item,isToday)}${note}</div>
+      </div>
+      <button class="chk${done?' checked':''}" onclick="toggle('${item.id}')" aria-label="סמן">${done?'✓':''}</button>
+    </div>`;
+  }
+
+  // iOS shortcut tip (once, today tab only)
+  if(isToday && !localStorage.getItem('tipDismissed')){
+    html+=`<div class="tip">
+      <b>💡 תזכורות אוטומטיות על האייפון</b>
+      לקבלת התראה ביום בשעה קבועה, צור אוטומציה ב-iOS Shortcuts:
+      <ol>
+        <li>פתח <strong>קיצורי דרך (Shortcuts)</strong> → לשונית <strong>אוטומציה</strong></li>
+        <li>לחץ + → <strong>שעה ביום</strong> → בחר שעה (למשל 8:00)</li>
+        <li>הוסף פעולה <strong>פתח כתובת URL</strong> → הכנס כתובת האפליקציה</li>
+        <li>כבה "שאל לפני הפעלה"</li>
+      </ol>
+      <small style="color:#999;font-size:11px">האפליקציה חייבת להיות מותקנת על מסך הבית (Share → Add to Home Screen)</small>
+    </div>`;
+  }
+
+  el.innerHTML=html;
+}
+
+function render(){
+  renderTabs();
+  renderOrders();
+}
+
+// ═══════════════════════════════════════════
+//  TOGGLE
+// ═══════════════════════════════════════════
+function toggle(id){
+  unlockAudio();
+  const was=isDone(id);
+  setDone(id,!was);
+  if(!was) playTick();
+  render();
+}
+
+// ═══════════════════════════════════════════
+//  AUDIO
+// ═══════════════════════════════════════════
+function unlockAudio(){
+  if(audioUnlocked) return;
+  try{
+    audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    const buf=audioCtx.createBuffer(1,1,22050);
+    const src=audioCtx.createBufferSource();
+    src.buffer=buf;src.connect(audioCtx.destination);src.start();
+    audioUnlocked=true;
+  }catch(e){}
+}
+
+function beep(freq,dur,type='sine',vol=0.28){
+  if(!audioCtx) return;
+  try{
+    const osc=audioCtx.createOscillator();
+    const g=audioCtx.createGain();
+    osc.connect(g);g.connect(audioCtx.destination);
+    osc.type=type;osc.frequency.value=freq;
+    const t=audioCtx.currentTime;
+    g.gain.setValueAtTime(vol,t);
+    g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+    osc.start(t);osc.stop(t+dur);
+  }catch(e){}
+}
+
+function playTick(){
+  beep(880,.12,'sine',.22);
+  setTimeout(()=>beep(1100,.12,'sine',.22),120);
+}
+
+function playAlarm(){
+  // urgent 3-tone pattern
+  beep(880,.18,'square',.3);
+  setTimeout(()=>beep(880,.18,'square',.3),280);
+  setTimeout(()=>beep(1100,.35,'square',.3),560);
+}
+
+function startAlarmLoop(){
+  stopAlarmLoop();
+  playAlarm();
+  alarmLoopId=setInterval(playAlarm,2800);
+}
+function stopAlarmLoop(){
+  if(alarmLoopId){clearInterval(alarmLoopId);alarmLoopId=null;}
+}
+
+// ═══════════════════════════════════════════
+//  ALARM TRIGGER LOGIC
+// ═══════════════════════════════════════════
+// Reminder offsets in minutes before deadline (positive = before, 0 = at, negative = after)
+const REMIND_AT=[60,50,40,30,20,10,0]; // every 10 min in the last hour before deadline
+
+function checkTriggers(){
+  const today=new Date().getDay();
+  const items=SCH[today]||[];
+  const n=nowMin();
+  const toFire=[];
+
+  for(const item of items){
+    if(isDone(item.id)||!item.dl) continue;
+    const dl=toMin(item.dl);
+    const diff=dl-n; // positive = time remaining
+
+    // Check standard remind points
+    for(const offset of REMIND_AT){
+      const key=`${item.id}:${offset}`;
+      if(!firedAlarms.has(key)&&diff<=offset&&diff>offset-1){
+        firedAlarms.add(key);
+        toFire.push(item);
+        break;
+      }
+    }
+
+    // After deadline: fire every 10 min until done
+    if(diff<0){
+      const minsOver=Math.abs(diff);
+      const slot=Math.floor(minsOver/10);
+      const key=`${item.id}:over${slot}`;
+      if(!firedAlarms.has(key)){
+        firedAlarms.add(key);
+        toFire.push(item);
+      }
+    }
+  }
+
+  // Deduplicate (item may have matched multiple times)
+  const seen=new Set();
+  const unique=toFire.filter(x=>{if(seen.has(x.id))return false;seen.add(x.id);return true;});
+
+  if(unique.length>0) showAlarm(unique);
+}
+
+// Also check for "missed" reminders when app first opens
+function checkMissed(){
+  const today=new Date().getDay();
+  const items=SCH[today]||[];
+  const n=nowMin();
+  const missed=[];
+  for(const item of items){
+    if(isDone(item.id)||!item.dl) continue;
+    const dl=toMin(item.dl);
+    if(dl-n<=0) missed.push(item);
+  }
+  if(missed.length>0){
+    // Mark slots as fired to avoid double alarm
+    missed.forEach(item=>{
+      REMIND_AT.forEach(o=>{const key=`${item.id}:${o}`;firedAlarms.add(key);});
+      const minsOver=Math.abs(toMin(item.dl)-n);
+      for(let i=0;i<=Math.floor(minsOver/10);i++) firedAlarms.add(`${item.id}:over${i}`);
+    });
+    showAlarm(missed);
+  }
+}
+
+// ═══════════════════════════════════════════
+//  ALARM MODAL
+// ═══════════════════════════════════════════
+function showAlarm(items){
+  alarmItems=items;
+  unlockAudio();
+
+  const n=nowMin();
+  const hasOver=items.some(x=>toMin(x.dl)<n);
+  document.getElementById('mSub').textContent=hasOver?'הגיע ועבר מועד ההזמנה!':'הגיע זמן לבצע הזמנה!';
+
+  document.getElementById('mItems').innerHTML=items.map(item=>{
+    const diff=toMin(item.dl)-n;
+    const timeStr=diff<0
+      ?`<small>⚠️ איחור של ${Math.abs(diff)} דקות!</small>`
+      :`<small>⏱ נותרו ${diff} דקות (עד ${item.dl})</small>`;
+    return `<div class="m-item"><strong>${item.ic} ${item.nm}</strong><br>${timeStr}</div>`;
+  }).join('');
+
+  document.getElementById('overlay').classList.add('on');
+  startAlarmLoop();
+
+  // Browser notification
+  if(Notification&&Notification.permission==='granted'){
+    const names=items.map(x=>x.nm).join(' · ');
+    try{
+      new Notification('הזמנות סחורה ⏰',{
+        body:`יש להזמין: ${names}`,
+        icon:'icon-192.png',tag:'order',requireInteraction:true,
+        vibrate:[200,100,200,100,400],
+      });
+    }catch(e){}
+  }
+}
+
+function doneAlarmItems(){
+  unlockAudio();
+  alarmItems.forEach(x=>setDone(x.id,true));
+  dismissAlarm();
+  render();
+}
+
+function snoozeAlarm(){
+  dismissAlarm();
+  if(snoozeId) clearTimeout(snoozeId);
+  snoozeId=setTimeout(()=>showAlarm(alarmItems.filter(x=>!isDone(x.id))),10*60*1000);
+}
+
+function dismissAlarm(){
+  document.getElementById('overlay').classList.remove('on');
+  stopAlarmLoop();
+}
+
+// ═══════════════════════════════════════════
+//  NOTIFICATIONS PERMISSION
+// ═══════════════════════════════════════════
+async function handleBell(){
+  unlockAudio();
+  if(!('Notification'in window)){
+    alert('הדפדפן אינו תומך בהתראות. נסה להוסיף לאפליקציה למסך הבית.');
+    return;
+  }
+  if(Notification.permission==='denied'){
+    alert('ההתראות חסומות. אפשר ב: הגדרות → הדפדפן → התראות');
+    return;
+  }
+  const p=await Notification.requestPermission();
+  if(p==='granted'){
+    document.getElementById('bellBtn').textContent='🔔';
+    new Notification('התראות הופעלו ✅',{body:'תקבל התראה לפני כל הזמנה',icon:'icon-192.png'});
+  } else {
+    document.getElementById('bellBtn').textContent='🔕';
+  }
+}
+
+// ═══════════════════════════════════════════
+//  SERVICE WORKER
+// ═══════════════════════════════════════════
+if('serviceWorker'in navigator){
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════
+//  TEST BUTTON — fires alarm for today's pending items immediately
+// ═══════════════════════════════════════════
+function testAlarmNow(){
+  unlockAudio();
+  const today=new Date().getDay();
+  const items=(SCH[today]||[]).filter(x=>!isDone(x.id)&&x.dl);
+  if(items.length===0){
+    alert('אין הזמנות ממתינות להיום (או הכל סומן כהושלם).\nעבור לשבת כדי לבדוק את הפרארי 🏎️');
+    return;
+  }
+  showAlarm(items);
+}
+
+document.addEventListener('touchstart',unlockAudio,{once:true});
+document.addEventListener('click',unlockAudio,{once:true});
+
+function tick(){
+  render();
+  checkTriggers();
+}
+
+render();
+setTimeout(()=>{checkMissed();checkTriggers();},1500); // immediate check on open
+
+setInterval(tick,60*1000); // check every minute
+</script>
+</body>
+</html>
