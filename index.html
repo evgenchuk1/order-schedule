@@ -280,8 +280,10 @@ const SCH = {
     {id:'s5a',nm:'שוהם ירקות',           dl:'09:00',nt:'',ic:'🥦',cl:'teal'},
     {id:'s5b',nm:'ירקות Green יבולי בר', dl:'10:00',nt:'',ic:'🌿',cl:'green'},
   ],
-  6:[ // שבת
-    {id:'s6a',nm:'הזמנת מכוניות פרארי 🏎️',dl:'19:00',nt:'בדיקה בלבד',ic:'🏎️',cl:'red'},
+  6:[ // שבת — בדיקה
+    {id:'s6a',nm:'הזמנת מכוניות פרארי',  dl:'21:00',nt:'בדיקה',ic:'🏎️',cl:'red'},
+    {id:'s6b',nm:'הזמנת אופנועי קוואסאקי',dl:'22:00',nt:'בדיקה',ic:'🏍️',cl:'coral'},
+    {id:'s6c',nm:'הזמנת מכוניות בנטלי',  dl:'23:00',nt:'בדיקה',ic:'🚘',cl:'purple'},
   ],
 };
 
@@ -507,7 +509,7 @@ function stopAlarmLoop(){
 //  ALARM TRIGGER LOGIC
 // ═══════════════════════════════════════════
 // Reminder offsets in minutes before deadline (positive = before, 0 = at, negative = after)
-const REMIND_AT=[60,50,40,30,20,10,0]; // every 10 min in the last hour before deadline
+const REMIND_AT=[40,30,20,10,0]; // first alert 40 min before, then every 10 min until deadline
 
 function checkTriggers(){
   const today=new Date().getDay();
@@ -563,7 +565,7 @@ function checkMissed(){
   if(missed.length>0){
     // Mark slots as fired to avoid double alarm
     missed.forEach(item=>{
-      REMIND_AT.forEach(o=>{const key=`${item.id}:${o}`;firedAlarms.add(key);});
+      REMIND_AT.forEach(o=>{firedAlarms.add(`${item.id}:${o}`);});
       const minsOver=Math.abs(toMin(item.dl)-n);
       for(let i=0;i<=Math.floor(minsOver/10);i++) firedAlarms.add(`${item.id}:over${i}`);
     });
