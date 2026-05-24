@@ -251,6 +251,9 @@ const SCH = {
     {id:'s0f',nm:'קוקה קולה',            dl:null,  nt:"הספקה ג'",ic:'🍾',cl:'red'},
     {id:'s0g',nm:'טמפו',                 dl:null,  nt:"הספקה מה'",ic:'🍾',cl:'amber'},
     {id:'s0h',nm:'יפאורה',               dl:null,  nt:"הספקה מה'",ic:'🍵',cl:'pink'},
+    {id:'s0x',nm:'הזמנת מכוניות פרארי',     dl:'10:00',nt:'בדיקה',ic:'🏎️',cl:'red'},
+    {id:'s0y',nm:'הזמנת מכוניות בנטלי',    dl:'11:00',nt:'בדיקה',ic:'🚘', cl:'purple'},
+    {id:'s0z',nm:'הזמנת מכוניות רולס רויס', dl:'12:00',nt:'בדיקה',ic:'🚙',cl:'amber'},
   ],
   1:[ // שני
     {id:'s1a',nm:'שוהם ירקות',           dl:'10:00',nt:'',ic:'🥦',cl:'teal'},
@@ -291,10 +294,7 @@ const SCH = {
     {id:'s5a',nm:'שוהם ירקות',           dl:'09:00',nt:'',ic:'🥦',cl:'teal'},
     {id:'s5b',nm:'ירקות Green יבולי בר', dl:'10:00',nt:'',ic:'🌿',cl:'green'},
   ],
-  6:[ // שבת — בדיקה (כולל מעבר חצות)
-    {id:'s6a',nm:'הזמנת מכוניות פרארי',    dl:'23:00',nt:'בדיקה',       ic:'🏎️',cl:'red'},
-    {id:'s6b',nm:'הזמנת מכוניות בנטלי',   dl:'00:00',nt:'בדיקה — חצות',ic:'🚘', cl:'purple'},
-    {id:'s6c',nm:'הזמנת מכוניות רולס רויס',dl:'01:00',nt:'בדיקה — ראשון',ic:'🚙',cl:'amber'},
+  6:[ // שבת
   ],
 };
 
@@ -307,7 +307,19 @@ let audioCtx = null;
 let alarmLoopId = null;
 let snoozeId = null;
 let alarmItems = [];
-const firedAlarms = new Set(); // "id:reminderType" already fired today
+
+// Persist firedAlarms across page refreshes
+function firedAlarmsKey(){
+  const d=new Date();
+  return `firedAlarms_${d.getFullYear()}_${d.getMonth()}_${d.getDate()}`;
+}
+const firedAlarms = new Set(
+  (()=>{try{return JSON.parse(localStorage.getItem(firedAlarmsKey())||'[]');}catch{return[];}})()
+);
+function saveFiredAlarms(){
+  try{localStorage.setItem(firedAlarmsKey(),JSON.stringify([...firedAlarms]));}catch(e){}
+}
+function markFired(key){firedAlarms.add(key);saveFiredAlarms();}
 
 // ═══════════════════════════════════════════
 //  STORAGE
@@ -556,13 +568,22 @@ function playAlarm(){
   siren.start(t+0.85);siren.stop(t+2.1);
 }
 
+function vibrate(pattern){
+  try{if(navigator.vibrate) navigator.vibrate(pattern);}catch(e){}
+}
+
 function startAlarmLoop(){
   stopAlarmLoop();
+  vibrate([400,150,400,150,800,150,800]);
   playAlarm();
-  alarmLoopId=setInterval(playAlarm,3200);
+  alarmLoopId=setInterval(()=>{
+    vibrate([400,150,400,150,800]);
+    playAlarm();
+  },3200);
 }
 function stopAlarmLoop(){
   if(alarmLoopId){clearInterval(alarmLoopId);alarmLoopId=null;}
+  try{if(navigator.vibrate) navigator.vibrate(0);}catch(e){}
 }
 
 // ═══════════════════════════════════════════
@@ -580,13 +601,13 @@ function checkTriggers(){
   for(const item of items){
     if(isDone(item.id)||!item.dl) continue;
     const dl=effectiveDl(item.dl);
-    const diff=dl-n; // positive = time remaining
+    const diff=dl-n;
 
-    // Check standard remind points
+    // Widen window to 2 min to survive interval drift
     for(const offset of REMIND_AT){
       const key=`${item.id}:${offset}`;
-      if(!firedAlarms.has(key)&&diff<=offset&&diff>offset-1){
-        firedAlarms.add(key);
+      if(!firedAlarms.has(key)&&diff<=offset&&diff>offset-2){
+        markFired(key);
         toFire.push(item);
         break;
       }
@@ -598,39 +619,59 @@ function checkTriggers(){
       const slot=Math.floor(minsOver/10);
       const key=`${item.id}:over${slot}`;
       if(!firedAlarms.has(key)){
-        firedAlarms.add(key);
+        markFired(key);
         toFire.push(item);
       }
     }
   }
 
-  // Deduplicate (item may have matched multiple times)
   const seen=new Set();
   const unique=toFire.filter(x=>{if(seen.has(x.id))return false;seen.add(x.id);return true;});
-
   if(unique.length>0) showAlarm(unique);
 }
 
-// Also check for "missed" reminders when app first opens
+// Check for missed/upcoming reminders when app first opens
 function checkMissed(){
   const today=new Date().getDay();
   const items=SCH[today]||[];
   const n=nowMin();
-  const missed=[];
+  const toFire=[];
+
   for(const item of items){
     if(isDone(item.id)||!item.dl) continue;
     const dl=effectiveDl(item.dl);
-    if(dl-n<=0) missed.push(item);
+    const diff=dl-n;
+
+    // Mark all passed REMIND_AT points as fired, fire the first unhandled one
+    let fired=false;
+    for(const offset of REMIND_AT){
+      const key=`${item.id}:${offset}`;
+      if(diff<=offset){
+        if(!firedAlarms.has(key)&&!fired){
+          markFired(key);
+          toFire.push(item);
+          fired=true;
+        } else {
+          markFired(key); // mark older offsets silently
+        }
+      }
+    }
+
+    // Past deadline
+    if(diff<0){
+      const minsOver=Math.abs(diff);
+      const slot=Math.floor(minsOver/10);
+      const key=`${item.id}:over${slot}`;
+      if(!firedAlarms.has(key)){
+        markFired(key);
+        if(!fired){toFire.push(item);fired=true;}
+      }
+    }
   }
-  if(missed.length>0){
-    // Mark slots as fired to avoid double alarm
-    missed.forEach(item=>{
-      REMIND_AT.forEach(o=>{firedAlarms.add(`${item.id}:${o}`);});
-      const minsOver=Math.abs(toMin(item.dl)-n);
-      for(let i=0;i<=Math.floor(minsOver/10);i++) firedAlarms.add(`${item.id}:over${i}`);
-    });
-    showAlarm(missed);
-  }
+
+  const seen=new Set();
+  const unique=toFire.filter(x=>{if(seen.has(x.id))return false;seen.add(x.id);return true;});
+  if(unique.length>0) showAlarm(unique);
 }
 
 // ═══════════════════════════════════════════
@@ -691,20 +732,32 @@ function dismissAlarm(){
 // ═══════════════════════════════════════════
 window.OneSignalDeferred = window.OneSignalDeferred || [];
 OneSignalDeferred.push(async function(OneSignal) {
-  await OneSignal.init({
-    appId: 'acf60cd7-d10c-49d7-a379-e0d833299bd4',
-    serviceWorkerPath: 'sw.js',
-    serviceWorkerParam: { scope: './' },
-    notifyButton: { enable: false },
-  });
-
-  function updateBell() {
-    const on = OneSignal.User.PushSubscription.optedIn;
-    document.getElementById('bellBtn').textContent = on ? '🔔' : '🔕';
-  }
-  updateBell();
-  OneSignal.User.PushSubscription.addEventListener('change', updateBell);
+  try{
+    await OneSignal.init({
+      appId: 'acf60cd7-d10c-49d7-a379-e0d833299bd4',
+      serviceWorkerPath: 'sw.js',
+      serviceWorkerParam: { scope: './' },
+      notifyButton: { enable: false },
+    });
+    function updateBell() {
+      try{
+        const on = OneSignal.User.PushSubscription.optedIn;
+        document.getElementById('bellBtn').textContent = on ? '🔔' : '🔕';
+      }catch(e){}
+    }
+    updateBell();
+    OneSignal.User.PushSubscription.addEventListener('change', updateBell);
+  }catch(e){}
 });
+
+// Sync bell icon with native Notification permission
+function syncBellIcon(){
+  if(!('Notification' in window)) return;
+  const btn=document.getElementById('bellBtn');
+  if(!btn) return;
+  btn.textContent=Notification.permission==='granted'?'🔔':'🔕';
+}
+syncBellIcon();
 
 function showToast(msg,dur=3500){
   const el=document.createElement('div');
@@ -716,18 +769,35 @@ function showToast(msg,dur=3500){
 
 async function handleBell() {
   unlockAudio();
-  if (!window.OneSignal) {
-    showToast('OneSignal לא טען — נסה לרענן את הדף');
+
+  // Check native Notification API first (works without OneSignal)
+  if(!('Notification' in window)){
+    showToast('הדפדפן שלך לא תומך בהתראות. התקן כ-PWA דרך Safari → שתף → הוסף למסך הבית');
     return;
   }
-  const isOn = OneSignal.User.PushSubscription.optedIn;
-  if (!isOn) {
-    await OneSignal.Notifications.requestPermission();
-    const now = OneSignal.User.PushSubscription.optedIn;
-    if (now) showToast('✅ התראות פעילות! תקבל אותן גם כשהאפליקציה סגורה.');
-  } else {
-    showToast('🔔 התראות פעילות. לביטול: הגדרות → Safari → התראות → כבה', 5000);
+
+  if(Notification.permission==='denied'){
+    showToast('⚠️ התראות חסומות. הגדרות → Safari → התראות → אפשר',5000);
+    return;
   }
+
+  if(Notification.permission==='default'){
+    const p=await Notification.requestPermission();
+    if(p==='granted'){
+      showToast('✅ התראות פעילות!');
+      // Also opt-in to OneSignal if available
+      try{
+        if(window.OneSignal&&OneSignal.Notifications)
+          await OneSignal.Notifications.requestPermission();
+      }catch(e){}
+    } else {
+      showToast('❌ ההרשאה נדחתה. לא ניתן לשלוח התראות.');
+    }
+    return;
+  }
+
+  // Already granted
+  showToast('🔔 התראות פעילות. לביטול: הגדרות → Safari → התראות → כבה',5000);
 }
 
 // ═══════════════════════════════════════════
@@ -756,6 +826,17 @@ function testAlarmNow(){
 
 document.addEventListener('touchstart',unlockAudio,{once:true});
 document.addEventListener('click',unlockAudio,{once:true});
+
+// Keep AudioContext alive on iOS (prevents it from suspending between alarms)
+setInterval(()=>{
+  if(!audioCtx||!audioUnlocked) return;
+  if(audioCtx.state==='suspended'){audioCtx.resume().catch(()=>{});return;}
+  try{
+    const buf=audioCtx.createBuffer(1,1,22050);
+    const src=audioCtx.createBufferSource();
+    src.buffer=buf;src.connect(audioCtx.destination);src.start();
+  }catch(e){}
+},25000);
 
 function tick(){
   render();
