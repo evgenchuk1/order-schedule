@@ -1,0 +1,34 @@
+name: 📦 הזמנות — תזכורות
+
+on:
+  schedule:
+    # ── כל השעות ב-UTC. שעון ישראל קיץ (IDT) = UTC + 3 ──────────────────
+    # אזהרה 30 דקות לפני
+    - cron: '30 5 * * 0,1,2,3'   # 08:30 IDT → אזהרה לפני 09:00  (א–ד)
+    - cron: '30 5 * * 5'          # 08:30 IDT → אזהרה לפני 09:00  (ו)
+    - cron: '30 6 * * 0,1,2,3'   # 09:30 IDT → אזהרה לפני 10:00  (א–ד)
+    - cron: '30 6 * * 5'          # 09:30 IDT → אזהרה לפני 10:00  (ו)
+    - cron: '30 7 * * 0,1,2,3,4' # 10:30 IDT → אזהרה לפני 11:00  (א–ה)
+    - cron: '30 8 * * 0,1,2,3,4' # 11:30 IDT → אזהרה לפני 12:00  (א–ה)
+    - cron: '30 9 * * 2,4'        # 12:30 IDT → אזהרה לפני 13:00  (ג, ה)
+    # דדליינים
+    - cron: '0  6 * * 0,1,2,3'   # 09:00 IDT (א–ד)
+    - cron: '0  6 * * 5'          # 09:00 IDT (ו)
+    - cron: '0  7 * * 0,1,2,3'   # 10:00 IDT (א–ד)
+    - cron: '0  7 * * 5'          # 10:00 IDT (ו)
+    - cron: '0  8 * * 0,1,2,3,4' # 11:00 IDT (א–ה)
+    - cron: '0  9 * * 0,1,2,3,4' # 12:00 IDT (א–ה)
+    - cron: '0 10 * * 2,4'        # 13:00 IDT (ג, ה)
+  workflow_dispatch: {}            # כפתור הפעלה ידנית לבדיקה
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Send push notification
+        env:
+          ONESIGNAL_APP_ID: 'acf60cd7-d10c-49d7-a379-e0d833299bd4'
+          ONESIGNAL_API_KEY: ${{ secrets.ONESIGNAL_API_KEY }}
+        run: python3 .github/scripts/notify.py
