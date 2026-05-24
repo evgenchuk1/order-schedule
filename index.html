@@ -747,12 +747,15 @@ OneSignalDeferred.push(async function(OneSignal) {
   }catch(e){}
 });
 
-// Sync bell icon with native Notification permission
+// Sync bell icon: granted + OneSignal subscribed = 🔔, otherwise = 🔕
 function syncBellIcon(){
   if(!('Notification' in window)) return;
   const btn=document.getElementById('bellBtn');
   if(!btn) return;
-  btn.textContent=Notification.permission==='granted'?'🔔':'🔕';
+  const nativOk = Notification.permission==='granted';
+  let osOk = false;
+  try{ osOk = !!(window.OneSignal && OneSignal.User.PushSubscription.optedIn); }catch(e){}
+  btn.textContent = (nativOk && osOk) ? '🔔' : '🔕';
 }
 syncBellIcon();
 
@@ -764,10 +767,20 @@ function showToast(msg,dur=3500){
   setTimeout(()=>el.remove(),dur);
 }
 
+async function tryOneSignalOptIn(){
+  try{
+    if(window.OneSignal && OneSignal.User && OneSignal.User.PushSubscription){
+      if(!OneSignal.User.PushSubscription.optedIn){
+        await OneSignal.Notifications.requestPermission();
+      }
+    }
+  }catch(e){}
+  syncBellIcon();
+}
+
 async function handleBell() {
   unlockAudio();
 
-  // Check native Notification API first (works without OneSignal)
   if(!('Notification' in window)){
     showToast('הדפדפן שלך לא תומך בהתראות. התקן כ-PWA דרך Safari → שתף → הוסף למסך הבית');
     return;
@@ -781,20 +794,17 @@ async function handleBell() {
   if(Notification.permission==='default'){
     const p=await Notification.requestPermission();
     if(p==='granted'){
+      await tryOneSignalOptIn();
       showToast('✅ התראות פעילות!');
-      // Also opt-in to OneSignal if available
-      try{
-        if(window.OneSignal&&OneSignal.Notifications)
-          await OneSignal.Notifications.requestPermission();
-      }catch(e){}
     } else {
       showToast('❌ ההרשאה נדחתה. לא ניתן לשלוח התראות.');
     }
     return;
   }
 
-  // Already granted
-  showToast('🔔 התראות פעילות. לביטול: הגדרות → Safari → התראות → כבה',5000);
+  // Already granted — ensure OneSignal is also subscribed
+  await tryOneSignalOptIn();
+  showToast('🔔 התראות פעילות!', 5000);
 }
 
 // ═══════════════════════════════════════════
