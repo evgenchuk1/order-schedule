@@ -1,15 +1,30 @@
-import os, json, urllib.request, datetime, sys
+import os, json, urllib.request, sys, datetime
 
-# שעון ישראל קיץ (IDT) = UTC + 3
-# בחורף (נובמבר–מרץ) שנה IDT ל-IST: hours=2
-now_il = datetime.datetime.utcnow() + datetime.timedelta(hours=3)
-h, m   = now_il.hour, now_il.minute
-cur    = h * 60 + m
+trigger = ' '.join(os.environ.get('TRIGGER_SCHEDULE', '').split())
+now_il  = datetime.datetime.utcnow() + datetime.timedelta(hours=3)
+dow     = (now_il.weekday() + 1) % 7   # Sun=0 … Sat=6
 
-# Python: שני=0 … ראשון=6  →  JS/schedule: ראשון=0 … שבת=6
-dow = (now_il.weekday() + 1) % 7
+# Map cron-string → 'digest' | (deadline_hour, is_warning)
+SLOT_MAP = {
+    '30 4 * * 0,1,2,3,4,5': 'digest',
+    # warn 30 min before deadline
+    '30 5 * * 0,1,2,3':   (9,  True),
+    '30 5 * * 5':          (9,  True),
+    '30 6 * * 0,1,2,3':   (10, True),
+    '30 6 * * 5':          (10, True),
+    '30 7 * * 0,1,2,3,4': (11, True),
+    '30 8 * * 0,1,2,3,4': (12, True),
+    '30 9 * * 2,4':        (13, True),
+    # at deadline
+    '0 6 * * 0,1,2,3':    (9,  False),
+    '0 6 * * 5':           (9,  False),
+    '0 7 * * 0,1,2,3':    (10, False),
+    '0 7 * * 5':           (10, False),
+    '0 8 * * 0,1,2,3,4':  (11, False),
+    '0 9 * * 0,1,2,3,4':  (12, False),
+    '0 10 * * 2,4':        (13, False),
+}
 
-# לוז הזמנות: {יום: [(שעה, דקה, שם, אייקון), ...]}
 SCH = {
     0: [  # ראשון — Sunday
         ( 9, 0, 'עופות',                 '🐔'),
@@ -62,24 +77,40 @@ SCH = {
     ],
 }
 
-orders     = SCH.get(dow, [])
-to_notify  = []
+DAY_HE = {0:'ראשון', 1:'שני', 2:'שלישי', 3:'רביעי', 4:'חמישי', 5:'שישי', 6:'שבת'}
 
-for (dh, dm, name, icon) in orders:
-    dl   = dh * 60 + dm
-    diff = dl - cur
-    if 25 <= diff <= 35:          # אזהרה ~30 דקות לפני
-        to_notify.append((name, icon, f'עוד 30 דקות! עד {dh:02d}:{dm:02d}'))
-    elif -5 <= diff <= 5:          # בדיוק בדדליין
-        to_notify.append((name, icon, f'⚠️ הגיע הזמן! עד {dh:02d}:{dm:02d}'))
+orders = SCH.get(dow, [])
+slot   = SLOT_MAP.get(trigger)
 
-if not to_notify:
-    print(f'[{now_il.strftime("%H:%M")} IDT, day={dow}] Nothing to notify.')
+print(f'trigger={repr(trigger)}  slot={slot}  dow={dow}  time={now_il.strftime("%H:%M")} IDT')
+
+if slot is None:
+    print('Unknown trigger — nothing to send.')
     sys.exit(0)
 
-lines = [f'{icon} {name} — {msg}' for (name, icon, msg) in to_notify]
-body  = '\n'.join(lines)
-title = '📦 הזמנות סחורה'
+if slot == 'digest':
+    if not orders:
+        print('No orders today.')
+        sys.exit(0)
+    lines = [f'יום {DAY_HE[dow]} — הזמנות היום:']
+    for (dh, dm, name, icon) in orders:
+        lines.append(f'{icon} {name} — עד {dh:02d}:{dm:02d}')
+    title = '📦 הזמנות סחורה — בוקר טוב'
+    body  = '\n'.join(lines)
+else:
+    target_h, is_warning = slot
+    matched = [(name, icon) for (dh, dm, name, icon) in orders if dh == target_h]
+    if not matched:
+        print(f'No orders at {target_h}:00 today (dow={dow}).')
+        sys.exit(0)
+    if is_warning:
+        msg = f'עוד 30 דקות! עד {target_h:02d}:00'
+    else:
+        msg = f'⚠️ הגיע הזמן! עד {target_h:02d}:00'
+    lines = [f'{icon} {name} — {msg}' for (name, icon) in matched]
+    title = '📦 הזמנות סחורה'
+    body  = '\n'.join(lines)
+
 print(f'Sending:\n{body}')
 
 payload = json.dumps({
