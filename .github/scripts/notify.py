@@ -1,7 +1,7 @@
 import os, json, urllib.request, sys, datetime
 
 trigger = ' '.join(os.environ.get('TRIGGER_SCHEDULE', '').split())
-now_il  = datetime.datetime.utcnow() + datetime.timedelta(hours=3)
+now_il  = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=3)
 dow     = (now_il.weekday() + 1) % 7   # Sun=0 … Sat=6
 
 # Map cron-string → 'digest' | (deadline_hour, is_warning)
