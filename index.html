@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="הזמנות">
+  <meta name="apple-mobile-web-app-title" content="הזמנות 208">
   <meta name="theme-color" content="#1B4F72">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
-  <title>לוז הזמנות סחורה</title>
+  <title>לוז הזמנות סחורה — 208 דיל נחל אורה</title>
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -193,6 +193,14 @@
     }
     @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(8px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
 
+    /* ─── Delivery day badge ─── */
+    .dlday{
+      display:inline-flex;align-items:center;gap:3px;
+      border-radius:8px;padding:3px 9px;font-size:14px;font-weight:600;
+      background:#EEF2FF;color:#4338CA;
+    }
+    .ccat{font-size:14px;color:#777;margin-top:2px;}
+
     /* ─── Setup tip ─── */
     .tip{
       background:#EAF4FD;border-radius:14px;padding:13px 15px;
@@ -208,7 +216,7 @@
 
 <div class="hdr">
   <div>
-    <div class="hdr-title">📋 לוז הזמנות סחורה</div>
+    <div class="hdr-title">📋 לוז הזמנות — 208 דיל נחל אורה</div>
     <div class="hdr-date" id="hdrDate"></div>
   </div>
   <div style="display:flex;gap:8px;align-items:center;">
@@ -241,58 +249,52 @@
 // ═══════════════════════════════════════════
 const DAYS = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
 
+// סניף 208 — דיל נחל אורה
+// שדות: id, nm (שם ספק), dl (שעת הזמנה אחרונה), dlDay (יום אספקה), nt (קטגוריות), ic, cl
 const SCH = {
-  0:[ // ראשון
-    {id:'s0a',nm:'מודיעין מכולת / Green',dl:'12:00',nt:'',ic:'🥫',cl:'green'},
-    {id:'s0b',nm:'שוהם ירקות',          dl:'10:00',nt:'',ic:'🥦',cl:'teal'},
-    {id:'s0c',nm:'פארם',                 dl:'12:00',nt:'',ic:'🧴',cl:'purple'},
-    {id:'s0d',nm:'עופות',                dl:'09:00',nt:'',ic:'🐔',cl:'coral'},
-    {id:'s0e',nm:'שוהם מצוננים',         dl:'10:00',nt:"הספקה ב'",ic:'🧀',cl:'blue'},
-    {id:'s0f',nm:'קוקה קולה',            dl:'11:00',nt:"הספקה ג'",ic:'🍾',cl:'red'},
-    {id:'s0g',nm:'טמפו',                 dl:'11:00',nt:"הספקה מה'",ic:'🍾',cl:'amber'},
-    {id:'s0h',nm:'יפאורה',               dl:'11:00',nt:"הספקה מה'",ic:'🍵',cl:'pink'},
+  0:[ // ראשון (Sunday)
+    {id:'s0a',nm:'שוהם מצוננים 6031',     dl:'09:05',dlDay:'שני',      nt:'עוף טרי',                      ic:'🐔',cl:'teal'},
+    {id:'s0b',nm:'שוהם קטיף 6032',        dl:'10:05',dlDay:'שני',      nt:'15° / 4° / מכולת',             ic:'🧊',cl:'blue'},
+    {id:'s0c',nm:'ראשון לציון 6000',       dl:'12:05',dlDay:'שני',      nt:'מכולת / מאפית / פארם / NF',    ic:'🏭',cl:'green'},
+    {id:'s0d',nm:'שוהם קטיף 6032 — משוקלד',dl:'12:05',dlDay:'שני',    nt:'משוקלד',                        ic:'🍫',cl:'amber'},
   ],
-  1:[ // שני
-    {id:'s1a',nm:'שוהם ירקות',           dl:'10:00',nt:'',ic:'🥦',cl:'teal'},
-    {id:'s1b',nm:'עופות',                dl:'09:00',nt:'',ic:'🐔',cl:'coral'},
-    {id:'s1c',nm:'רשל"ץ כלי ניקיון',    dl:'12:00',nt:'',ic:'🧹',cl:'blue'},
-    {id:'s1d',nm:'משוקלדים',             dl:'12:00',nt:'',ic:'🍫',cl:'amber'},
-    {id:'s1e',nm:'יפאורה',               dl:'11:00',nt:"הספקה ד'",ic:'🍵',cl:'pink'},
+  1:[ // שני (Monday)
+    {id:'s1a',nm:'שוהם מצוננים 6031',     dl:'09:05',dlDay:'שלישי',    nt:'עוף טרי',                      ic:'🐔',cl:'teal'},
+    {id:'s1b',nm:'שוהם מצוננים 6031',     dl:'10:05',dlDay:'רביעי',    nt:'בשר / חלב / נקניקים',          ic:'🥩',cl:'red'},
+    {id:'s1c',nm:'שוהם קטיף 6032',        dl:'10:05',dlDay:'שלישי',    nt:'15° / 4° / מכולת',             ic:'🧊',cl:'blue'},
+    {id:'s1d',nm:'מודיעין 6030',           dl:'12:05',dlDay:'שלישי',    nt:'גרין / מכולת / פארם / NF',     ic:'🏪',cl:'green'},
+    {id:'s1e',nm:'יפאורה',                 dl:'15:00',dlDay:'רביעי',    nt:'',                             ic:'🍵',cl:'pink'},
   ],
-  2:[ // שלישי
-    {id:'s2a',nm:'מודיעין מכולת / Green',dl:'12:00',nt:'',ic:'🥫',cl:'green'},
-    {id:'s2b',nm:'שוהם ירקות',           dl:'10:00',nt:'',ic:'🥦',cl:'teal'},
-    {id:'s2c',nm:'רשל"ץ כלי ניקיון',    dl:'12:00',nt:'',ic:'🧹',cl:'blue'},
-    {id:'s2d',nm:'פארם',                 dl:'12:00',nt:'',ic:'🧴',cl:'purple'},
-    {id:'s2e',nm:'עופות',                dl:'09:00',nt:'',ic:'🐔',cl:'coral'},
-    {id:'s2f',nm:'משוקלדים',             dl:'12:00',nt:'',ic:'🍫',cl:'amber'},
-    {id:'s2g',nm:'קוקה קולה',            dl:'11:00',nt:"הספקה ה'",ic:'🍾',cl:'red'},
-    {id:'s2h',nm:'מאפית',                dl:'13:00',nt:"הספקה ה'",ic:'🍞',cl:'amber'},
-    {id:'s2i',nm:'טמפו',                 dl:'11:00',nt:"הספקה ד'",ic:'🍾',cl:'amber'},
+  2:[ // שלישי (Tuesday)
+    {id:'s2a',nm:'שוהם מצוננים 6031',     dl:'09:05',dlDay:'רביעי',    nt:'עוף טרי',                      ic:'🐔',cl:'teal'},
+    {id:'s2b',nm:'שוהם מצוננים 6031',     dl:'10:05',dlDay:'ראשון',    nt:'חומרי עזר מאפית',              ic:'🥐',cl:'coral'},
+    {id:'s2c',nm:'שוהם קטיף 6032',        dl:'10:05',dlDay:'רביעי',    nt:'15° / 4° / מכולת',             ic:'🧊',cl:'blue'},
+    {id:'s2d',nm:'ראשון לציון 6000',       dl:'12:05',dlDay:'רביעי',    nt:'מכולת / מאפית / פארם / NF',    ic:'🏭',cl:'green'},
+    {id:'s2e',nm:'לב הארץ 6047',           dl:'12:05',dlDay:'ראשון',    nt:'גרין / מכולת / פארם / NF / משוקלד',ic:'🌿',cl:'teal'},
+    {id:'s2f',nm:'טמפו',                   dl:'13:00',dlDay:'רביעי',    nt:'',                             ic:'🍾',cl:'amber'},
+    {id:'s2g',nm:'שוהם קפואים 6033',       dl:'13:05',dlDay:'חמישי',    nt:'קפואים + חומ"ז מאפית',         ic:'❄️',cl:'purple'},
+    {id:'s2h',nm:'קוקה קולה',              dl:'17:00',dlDay:'חמישי',    nt:'',                             ic:'🥤',cl:'red'},
   ],
-  3:[ // רביעי
-    {id:'s3a',nm:'מודיעין מכולת / Green',dl:'12:00',nt:'',ic:'🥫',cl:'green'},
-    {id:'s3b',nm:'שוהם ירקות',           dl:'10:00',nt:'',ic:'🥦',cl:'teal'},
-    {id:'s3c',nm:'רשל"ץ כלי ניקיון',    dl:'12:00',nt:'',ic:'🧹',cl:'blue'},
-    {id:'s3d',nm:'עופות',                dl:'09:00',nt:'',ic:'🐔',cl:'coral'},
-    {id:'s3e',nm:'משוקלדים',             dl:'12:00',nt:'',ic:'🍫',cl:'amber'},
-    {id:'s3f',nm:'שוהם מצוננים',         dl:'10:00',nt:"הספקה א'",ic:'🧀',cl:'blue'},
-    {id:'s3g',nm:'יפאורה',               dl:'11:00',nt:"הספקה א'",ic:'🍵',cl:'pink'},
+  3:[ // רביעי (Wednesday)
+    {id:'s3a',nm:'שוהם מצוננים 6031',     dl:'09:05',dlDay:'חמישי',    nt:'עוף טרי',                      ic:'🐔',cl:'teal'},
+    {id:'s3b',nm:'שוהם מצוננים 6031',     dl:'10:05',dlDay:'ראשון',    nt:'בשר / חלב / נקניקים',          ic:'🥩',cl:'red'},
+    {id:'s3c',nm:'שוהם קטיף 6032',        dl:'10:05',dlDay:'חמישי',    nt:'15° / 4° / מכולת',             ic:'🧊',cl:'blue'},
+    {id:'s3d',nm:'מודיעין 6030',           dl:'12:05',dlDay:'חמישי',    nt:'גרין / מכולת / פארם / NF',     ic:'🏪',cl:'green'},
+    {id:'s3e',nm:'שוהם קטיף 6032 — משוקלד',dl:'12:05',dlDay:'חמישי', nt:'משוקלד',                        ic:'🍫',cl:'amber'},
+    {id:'s3f',nm:'יפאורה',                 dl:'15:00',dlDay:'ראשון',    nt:'',                             ic:'🍵',cl:'pink'},
   ],
-  4:[ // חמישי
-    {id:'s4a',nm:'מודיעין מכולת / Green',dl:'12:00',nt:'',ic:'🥫',cl:'green'},
-    {id:'s4b',nm:'רשל"ץ כלי ניקיון',    dl:'12:00',nt:'',ic:'🧹',cl:'blue'},
-    {id:'s4c',nm:'פארם',                 dl:'12:00',nt:'',ic:'🧴',cl:'purple'},
-    {id:'s4d',nm:'משוקלדים',             dl:'12:00',nt:'',ic:'🍫',cl:'amber'},
-    {id:'s4e',nm:'מאפית',                dl:'13:00',nt:"הספקה ב'",ic:'🍞',cl:'amber'},
-    {id:'s4f',nm:'טמפו',                 dl:'11:00',nt:"הספקה א'",ic:'🍾',cl:'amber'},
+  4:[ // חמישי (Thursday)
+    {id:'s4a',nm:'שוהם מצוננים 6031',     dl:'09:05',dlDay:'שישי',     nt:'עוף טרי',                      ic:'🐔',cl:'teal'},
+    {id:'s4b',nm:'שוהם מצוננים 6031',     dl:'10:05',dlDay:'רביעי',    nt:'חומרי עזר מאפית',              ic:'🥐',cl:'coral'},
+    {id:'s4c',nm:'שוהם קטיף 6032',        dl:'10:05',dlDay:'ראשון',    nt:'15° / 4° / מכולת',             ic:'🧊',cl:'blue'},
+    {id:'s4d',nm:'ראשון לציון 6000',       dl:'12:05',dlDay:'ראשון',    nt:'מכולת / מאפית / פארם / NF',    ic:'🏭',cl:'green'},
+    {id:'s4e',nm:'לב הארץ 6047',           dl:'12:05',dlDay:'רביעי',    nt:'גרין / מכולת / פארם / NF / משוקלד',ic:'🌿',cl:'teal'},
+    {id:'s4f',nm:'טמפו',                   dl:'13:00',dlDay:'ראשון',    nt:'',                             ic:'🍾',cl:'amber'},
+    {id:'s4g',nm:'שוהם קפואים 6033',       dl:'13:05',dlDay:'שני',      nt:'קפואים + חומ"ז מאפית',         ic:'❄️',cl:'purple'},
+    {id:'s4h',nm:'קוקה קולה',              dl:'18:00',dlDay:'ראשון',    nt:'',                             ic:'🥤',cl:'red'},
   ],
-  5:[ // שישי
-    {id:'s5a',nm:'שוהם ירקות',           dl:'09:00',nt:'',ic:'🥦',cl:'teal'},
-    {id:'s5b',nm:'ירקות Green יבולי בר', dl:'10:00',nt:'',ic:'🌿',cl:'green'},
-  ],
-  6:[ // שבת
-  ],
+  5:[], // שישי — אין הזמנות
+  6:[], // שבת — אין הזמנות
 };
 
 // ═══════════════════════════════════════════
@@ -440,12 +442,14 @@ function renderOrders(){
       if(st==='over'||st==='hot') extra=' urgent';
       else if(st==='warn') extra=' warning';
     }
-    const note=item.nt?`<span>${item.nt}</span>`:'';
+    const note=item.nt?`<span class="ccat">${item.nt}</span>`:'';
+    const dayBadge=item.dlDay?`<span class="dlday">📦 ${item.dlDay}</span>`:'';
     html+=`<div class="card c-${item.cl}${done?' done':''}${extra}" id="card_${item.id}">
       <span class="cicon">${item.ic}</span>
       <div class="cinfo">
         <div class="cname">${item.nm}</div>
-        <div class="cmeta">${dlBadge(item,isToday)}${note}</div>
+        <div class="cmeta">${dlBadge(item,isToday)}${dayBadge}</div>
+        ${note}
       </div>
       <button class="chk${done?' checked':''}" onclick="toggle('${item.id}')" aria-label="סמן">${done?'✓':''}</button>
     </div>`;
@@ -687,7 +691,8 @@ function showAlarm(items){
     const timeStr=diff<0
       ?`<small>⚠️ איחור של ${Math.abs(diff)} דקות!</small>`
       :`<small>⏱ נותרו ${diff} דקות (עד ${item.dl})</small>`;
-    return `<div class="m-item"><strong>${item.ic} ${item.nm}</strong><br>${timeStr}</div>`;
+    const dayStr=item.dlDay?`<small style="color:#4338CA">📦 אספקה: ${item.dlDay}</small>`:'' ;
+    return `<div class="m-item"><strong>${item.ic} ${item.nm}</strong><br>${timeStr}${dayStr?'&nbsp;&nbsp;'+dayStr:''}</div>`;
   }).join('');
 
   document.getElementById('overlay').classList.add('on');
