@@ -314,7 +314,7 @@
     <div class="m-sub" id="mSub"></div>
     <div class="m-items" id="mItems"></div>
     <button class="mbtn mbtn-ok" onclick="doneAlarmItems()">✓ סמן כהוזמן</button>
-    <button class="mbtn mbtn-snooze" onclick="snoozeAlarm()">⏱ תזכיר שוב בעוד 10 דקות</button>
+    <button class="mbtn mbtn-snooze" onclick="snoozeAlarm()">⏱ תזכורת הבאה בעוד 5 דקות</button>
   </div>
 </div>
 
@@ -403,9 +403,8 @@ const SCH = {
   ],
   5:[], // שישי — אין הזמנות
   6:[ // שבת — טסט זמני
-    {id:'s6a',nm:'מזראטי',  dl:'20:00',dlDay:'שבת',nt:'טסט',ic:'🏎️',cl:'red'},
-    {id:'s6b',nm:'פרארי',   dl:'21:00',dlDay:'שבת',nt:'טסט',ic:'🏎️',cl:'coral'},
-    {id:'s6c',nm:'בנטלי',   dl:'22:00',dlDay:'שבת',nt:'טסט',ic:'🏎️',cl:'purple'},
+    {id:'s6a',nm:'פרארי',   dl:'23:00',dlDay:'ראשון',nt:'טסט',ic:'🏎️',cl:'red'},
+    {id:'s6b',nm:'מזראטי',  dl:'00:00',dlDay:'ראשון',nt:'טסט',ic:'🏎️',cl:'coral'},
   ],
 };
 
@@ -703,7 +702,7 @@ function stopAlarmLoop(){
 //  ALARM TRIGGER LOGIC
 // ═══════════════════════════════════════════
 // Reminder offsets in minutes before deadline (positive = before, 0 = at, negative = after)
-const REMIND_AT=[40,30,20,10,0]; // first alert 40 min before, then every 10 min until deadline
+const REMIND_AT=[40,35,30,25,20,15,10,5,0]; // first alert 40 min before, then every 5 min until deadline
 
 function checkTriggers(){
   const today=new Date().getDay();
@@ -726,10 +725,10 @@ function checkTriggers(){
       }
     }
 
-    // After deadline: fire every 10 min until done
+    // After deadline: fire every 5 min until done
     if(diff<0){
       const minsOver=Math.abs(diff);
-      const slot=Math.floor(minsOver/10);
+      const slot=Math.floor(minsOver/5);
       const key=`${item.id}:over${slot}`;
       if(!firedAlarms.has(key)){
         markFired(key);
@@ -773,7 +772,7 @@ function checkMissed(){
     // Past deadline
     if(diff<0){
       const minsOver=Math.abs(diff);
-      const slot=Math.floor(minsOver/10);
+      const slot=Math.floor(minsOver/5);
       const key=`${item.id}:over${slot}`;
       if(!firedAlarms.has(key)){
         markFired(key);
@@ -833,7 +832,7 @@ function doneAlarmItems(){
 function snoozeAlarm(){
   dismissAlarm();
   if(snoozeId) clearTimeout(snoozeId);
-  snoozeId=setTimeout(()=>showAlarm(alarmItems.filter(x=>!isDone(x.id))),10*60*1000);
+  snoozeId=setTimeout(()=>showAlarm(alarmItems.filter(x=>!isDone(x.id))),5*60*1000);
 }
 
 function dismissAlarm(){
