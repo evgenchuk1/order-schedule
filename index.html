@@ -888,10 +888,17 @@ async function tryOneSignalOptIn(){
   try{
     if(window.OneSignal && OneSignal.User && OneSignal.User.PushSubscription){
       if(!OneSignal.User.PushSubscription.optedIn){
-        await OneSignal.Notifications.requestPermission();
+        // Request native iOS permission if not yet granted
+        if(Notification.permission !== 'granted'){
+          await OneSignal.Notifications.requestPermission();
+        }
+        // Explicitly complete OneSignal subscription (required on iOS PWA)
+        await OneSignal.User.PushSubscription.optIn();
       }
     }
-  }catch(e){}
+  }catch(e){ console.warn('OneSignal optIn error:', e); }
+  // Give OneSignal a moment to update subscription state
+  await new Promise(r => setTimeout(r, 800));
   syncBellIcon();
 }
 
