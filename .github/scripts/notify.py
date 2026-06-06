@@ -58,17 +58,17 @@ SCH = {
     ],
     5: [],
     6: [  # Saturday — TEST ONLY, remove after testing
-        {'nm': 'מזראטי',  'dl': '17:00', 'ic': '🏎️', 'nt': 'טסט'},
-        {'nm': 'פרארי',   'dl': '18:00', 'ic': '🏎️', 'nt': 'טסט'},
-        {'nm': 'בנטלי',   'dl': '19:00', 'ic': '🏎️', 'nt': 'טסט'},
+        {'nm': 'מזראטי',  'dl': '20:00', 'ic': '🏎️', 'nt': 'טסט'},
+        {'nm': 'פרארי',   'dl': '21:00', 'ic': '🏎️', 'nt': 'טסט'},
+        {'nm': 'בנטלי',   'dl': '22:00', 'ic': '🏎️', 'nt': 'טסט'},
     ],
 }
 
 # ─── Timing config ───────────────────────────────────────────────────────────
-REMIND_AT  = [40, 30, 20, 10, 0]   # minutes before deadline
-POST_EVERY = 10                     # after deadline: repeat every N minutes
+REMIND_AT  = [40, 35, 30, 25, 20, 15, 10, 5, 0]   # minutes before deadline
+POST_EVERY = 5                      # after deadline: repeat every N minutes
 POST_MAX   = 120                    # stop after N minutes past deadline
-WINDOW     = 9                      # match window (absorbs cron jitter)
+WINDOW     = 5                      # match window (absorbs cron jitter, must be <= POST_EVERY)
 
 def dl_to_min(s):
     h, m = map(int, s.split(':'))
