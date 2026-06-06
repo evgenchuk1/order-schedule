@@ -210,6 +210,81 @@
     .tip b{display:block;margin-bottom:4px;font-size:13px;}
     .tip ol{padding-right:16px;margin-top:5px;}
     .tip ol li{margin-bottom:3px;}
+
+    /* ─── Warehouse FAB ─── */
+    .fab-wh{
+      position:fixed;bottom:28px;left:16px;
+      width:52px;height:52px;border-radius:50%;
+      background:linear-gradient(135deg,#1B4F72,#2980B9);
+      color:#fff;border:none;font-size:22px;
+      cursor:pointer;z-index:500;
+      box-shadow:0 4px 14px rgba(0,0,0,.3);
+      display:flex;align-items:center;justify-content:center;
+      transition:transform .15s,box-shadow .15s;
+    }
+    .fab-wh:active{transform:scale(.9);}
+
+    .wh-drop{
+      position:fixed;bottom:90px;left:16px;
+      background:#fff;border-radius:16px;
+      box-shadow:0 6px 28px rgba(0,0,0,.22);
+      min-width:248px;z-index:600;
+      overflow:hidden;
+      transform-origin:bottom left;
+      display:none;
+    }
+    .wh-drop.open{display:block;animation:dropIn .18s ease;}
+    @keyframes dropIn{from{transform:scale(.88);opacity:0;}to{transform:scale(1);opacity:1;}}
+    .wh-drop-hdr{
+      padding:10px 15px 8px;font-size:13px;color:#888;
+      border-bottom:1px solid #F0F4F8;font-weight:700;letter-spacing:.3px;
+    }
+    .wh-drop-item{
+      padding:13px 15px;font-size:16px;cursor:pointer;
+      display:flex;align-items:center;gap:9px;
+      border-bottom:1px solid #F5F7FA;color:#1a1a2e;
+      transition:background .12s;
+    }
+    .wh-drop-item:last-child{border-bottom:none;}
+    .wh-drop-item:active{background:#EBF5FB;}
+    .wh-drop-item .wh-num{
+      font-weight:800;color:#1B4F72;min-width:36px;
+    }
+
+    /* ─── Warehouse schedule modal ─── */
+    .wh-overlay{
+      display:none;position:fixed;inset:0;
+      background:rgba(0,0,0,.68);z-index:1100;
+      align-items:center;justify-content:center;padding:14px;
+    }
+    .wh-overlay.on{display:flex;}
+    .wh-modal{
+      background:#fff;border-radius:20px;padding:20px 14px 18px;
+      max-width:480px;width:100%;max-height:88vh;overflow-y:auto;
+      animation:popIn .22s ease;
+    }
+    .wh-modal-title{
+      font-size:19px;font-weight:800;color:#1B4F72;
+      margin-bottom:14px;text-align:center;
+    }
+    .wh-table{width:100%;border-collapse:collapse;font-size:14px;}
+    .wh-table th{
+      background:#E6F1FB;color:#0C447C;padding:9px 7px;
+      text-align:center;font-weight:700;font-size:13px;
+    }
+    .wh-table td{
+      padding:9px 7px;text-align:center;
+      border-bottom:1px solid #F0F4F8;color:#333;
+    }
+    .wh-table tr:last-child td{border-bottom:none;}
+    .wh-table tr:nth-child(even) td{background:#FAFCFF;}
+    .wh-close{
+      width:100%;margin-top:14px;padding:13px;
+      border:none;border-radius:13px;
+      background:#1B4F72;color:#fff;
+      font-size:17px;font-weight:700;cursor:pointer;
+    }
+    .wh-close:active{opacity:.8;}
   </style>
 </head>
 <body>
@@ -240,6 +315,39 @@
     <div class="m-items" id="mItems"></div>
     <button class="mbtn mbtn-ok" onclick="doneAlarmItems()">✓ סמן כהוזמן</button>
     <button class="mbtn mbtn-snooze" onclick="snoozeAlarm()">⏱ תזכיר שוב בעוד 10 דקות</button>
+  </div>
+</div>
+
+<!-- Warehouse FAB -->
+<button class="fab-wh" id="fabWh" onclick="toggleWhDropdown()" title="לוז לפי מרכז הפצה">🏭</button>
+
+<!-- Warehouse dropdown -->
+<div class="wh-drop" id="whDrop">
+  <div class="wh-drop-hdr">בחר מרכז הפצה</div>
+  <div class="wh-drop-item" onclick="showWarehouseSchedule('6000')"><span class="wh-num">6000</span>🏭 ראשון לציון</div>
+  <div class="wh-drop-item" onclick="showWarehouseSchedule('6030')"><span class="wh-num">6030</span>🏪 מודיעין</div>
+  <div class="wh-drop-item" onclick="showWarehouseSchedule('6031')"><span class="wh-num">6031</span>🐔 שוהם מצוננים</div>
+  <div class="wh-drop-item" onclick="showWarehouseSchedule('6032')"><span class="wh-num">6032</span>🧊 שוהם קטיף</div>
+  <div class="wh-drop-item" onclick="showWarehouseSchedule('6033')"><span class="wh-num">6033</span>❄️ שוהם קפואים</div>
+  <div class="wh-drop-item" onclick="showWarehouseSchedule('6047')"><span class="wh-num">6047</span>🌿 לב הארץ</div>
+</div>
+
+<!-- Warehouse schedule modal -->
+<div class="wh-overlay" id="whOverlay" onclick="closeWhModal()">
+  <div class="wh-modal" onclick="event.stopPropagation()">
+    <div class="wh-modal-title" id="whModalTitle"></div>
+    <table class="wh-table">
+      <thead>
+        <tr>
+          <th>יום הזמנה</th>
+          <th>עד שעה</th>
+          <th>יום אספקה</th>
+          <th>קטגוריות</th>
+        </tr>
+      </thead>
+      <tbody id="whTableBody"></tbody>
+    </table>
+    <button class="wh-close" onclick="closeWhModal()">סגור ✕</button>
   </div>
 </div>
 
@@ -859,6 +967,81 @@ render();
 setTimeout(()=>{checkMissed();checkTriggers();},1500); // immediate check on open
 
 setInterval(tick,60*1000); // check every minute
+
+// ═══════════════════════════════════════════
+//  WAREHOUSE SCHEDULES
+// ═══════════════════════════════════════════
+const WH_DATA = {
+  '6000':{name:'ראשון לציון 6000',icon:'🏭',rows:[
+    {od:'ראשון',ot:'12:05',dd:'שני',   cat:'מכולת / מאפית / פארם / NF'},
+    {od:'שלישי',ot:'12:05',dd:'רביעי', cat:'מכולת / מאפית / פארם / NF'},
+    {od:'חמישי',ot:'12:05',dd:'ראשון', cat:'מכולת / מאפית / פארם / NF'},
+  ]},
+  '6030':{name:'מודיעין 6030',icon:'🏪',rows:[
+    {od:'שני',  ot:'12:05',dd:'שלישי', cat:'גרין / מכולת / פארם / NF'},
+    {od:'רביעי',ot:'12:05',dd:'חמישי', cat:'גרין / מכולת / פארם / NF'},
+  ]},
+  '6031':{name:'שוהם מצוננים 6031',icon:'🐔',rows:[
+    {od:'ראשון',ot:'09:05',dd:'שני',   cat:'עוף טרי'},
+    {od:'שני',  ot:'09:05',dd:'שלישי', cat:'עוף טרי'},
+    {od:'שני',  ot:'10:05',dd:'רביעי', cat:'בשר / חלב / נקניקים'},
+    {od:'שלישי',ot:'09:05',dd:'רביעי', cat:'עוף טרי'},
+    {od:'שלישי',ot:'10:05',dd:'ראשון', cat:'חומרי עזר מאפית'},
+    {od:'רביעי',ot:'09:05',dd:'חמישי', cat:'עוף טרי'},
+    {od:'רביעי',ot:'10:05',dd:'ראשון', cat:'בשר / חלב / נקניקים'},
+    {od:'חמישי',ot:'09:05',dd:'שישי',  cat:'עוף טרי'},
+    {od:'חמישי',ot:'10:05',dd:'רביעי', cat:'חומרי עזר מאפית'},
+  ]},
+  '6032':{name:'שוהם קטיף 6032',icon:'🧊',rows:[
+    {od:'ראשון',ot:'10:05',dd:'שני',   cat:'15° / 4° / מכולת'},
+    {od:'ראשון',ot:'12:05',dd:'שני',   cat:'משוקלד'},
+    {od:'שני',  ot:'10:05',dd:'שלישי', cat:'15° / 4° / מכולת'},
+    {od:'שלישי',ot:'10:05',dd:'רביעי', cat:'15° / 4° / מכולת'},
+    {od:'רביעי',ot:'10:05',dd:'חמישי', cat:'15° / 4° / מכולת'},
+    {od:'רביעי',ot:'12:05',dd:'חמישי', cat:'משוקלד'},
+    {od:'חמישי',ot:'10:05',dd:'ראשון', cat:'15° / 4° / מכולת'},
+  ]},
+  '6033':{name:'שוהם קפואים 6033',icon:'❄️',rows:[
+    {od:'שלישי',ot:'13:05',dd:'חמישי', cat:'קפואים + חומ"ז מאפית'},
+    {od:'חמישי',ot:'13:05',dd:'שני',   cat:'קפואים + חומ"ז מאפית'},
+  ]},
+  '6047':{name:'לב הארץ 6047',icon:'🌿',rows:[
+    {od:'שלישי',ot:'12:05',dd:'ראשון', cat:'גרין / מכולת / פארם / NF / משוקלד'},
+    {od:'חמישי',ot:'12:05',dd:'רביעי', cat:'גרין / מכולת / פארם / NF / משוקלד'},
+  ]},
+};
+
+function toggleWhDropdown(){
+  document.getElementById('whDrop').classList.toggle('open');
+}
+
+function showWarehouseSchedule(code){
+  document.getElementById('whDrop').classList.remove('open');
+  const wh=WH_DATA[code];
+  if(!wh) return;
+  document.getElementById('whModalTitle').textContent=wh.icon+' '+wh.name;
+  document.getElementById('whTableBody').innerHTML=wh.rows.map(r=>`
+    <tr>
+      <td><strong>${r.od}</strong></td>
+      <td style="color:#27AE60;font-weight:700">⏱ ${r.ot}</td>
+      <td style="color:#4338CA;font-weight:600">📦 ${r.dd}</td>
+      <td style="text-align:right;font-size:13px;color:#555">${r.cat}</td>
+    </tr>`).join('');
+  document.getElementById('whOverlay').classList.add('on');
+}
+
+function closeWhModal(){
+  document.getElementById('whOverlay').classList.remove('on');
+}
+
+document.addEventListener('click',function(e){
+  const fab=document.getElementById('fabWh');
+  const drop=document.getElementById('whDrop');
+  if(!drop.classList.contains('open')) return;
+  if(!fab.contains(e.target)&&!drop.contains(e.target)){
+    drop.classList.remove('open');
+  }
+});
 </script>
 </body>
 </html>
