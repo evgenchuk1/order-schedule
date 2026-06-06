@@ -1,9 +1,9 @@
 name: 📦 הזמנות — תזכורות
 
 on:
-  # Every 10 min, Sun–Thu, 05:00–16:00 UTC = 08:00–19:00 Israel (UTC+3 summer)
+  # Every 10 min, Sun–Thu + Sat (test), 05:00–16:00 UTC = 08:00–19:00 Israel (UTC+3 summer)
   schedule:
-    - cron: '*/10 5-16 * * 0,1,2,3,4'
+    - cron: '*/10 5-16 * * 0,1,2,3,4,6'
   workflow_dispatch: {}
 
 jobs:
