@@ -1,26 +1,9 @@
 name: 📦 הזמנות — תזכורות
 
 on:
+  # Every 10 min, Sun–Thu, 05:00–16:00 UTC = 08:00–19:00 Israel (UTC+3 summer)
   schedule:
-    # All times UTC. Israel Summer Time (IDT) = UTC + 3
-    # Morning digest — sent every workday at 07:30 IDT
-    - cron: '30 4 * * 0,1,2,3,4,5'
-    # Individual reminders — 30 min before deadline
-    - cron: '30 5 * * 0,1,2,3'
-    - cron: '30 5 * * 5'
-    - cron: '30 6 * * 0,1,2,3'
-    - cron: '30 6 * * 5'
-    - cron: '30 7 * * 0,1,2,3,4'
-    - cron: '30 8 * * 0,1,2,3,4'
-    - cron: '30 9 * * 2,4'
-    # Individual reminders — at deadline
-    - cron: '0 6 * * 0,1,2,3'
-    - cron: '0 6 * * 5'
-    - cron: '0 7 * * 0,1,2,3'
-    - cron: '0 7 * * 5'
-    - cron: '0 8 * * 0,1,2,3,4'
-    - cron: '0 9 * * 0,1,2,3,4'
-    - cron: '0 10 * * 2,4'
+    - cron: '*/10 5-16 * * 0,1,2,3,4'
   workflow_dispatch: {}
 
 jobs:
@@ -28,9 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Send push notification
+      - name: Send order push notifications
         env:
           ONESIGNAL_APP_ID: 'acf60cd7-d10c-49d7-a379-e0d833299bd4'
           ONESIGNAL_API_KEY: ${{ secrets.ONESIGNAL_API_KEY }}
-          TRIGGER_SCHEDULE: ${{ github.event.schedule }}
         run: python3 .github/scripts/notify.py

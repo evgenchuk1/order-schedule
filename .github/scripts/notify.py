@@ -1,135 +1,164 @@
-import os, json, urllib.request, sys, datetime
+import os, json, sys, urllib.request
+from datetime import datetime, timezone, timedelta
+from collections import defaultdict
 
-trigger = ' '.join(os.environ.get('TRIGGER_SCHEDULE', '').split())
-now_il  = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=3)
-dow     = (now_il.weekday() + 1) % 7   # Sun=0 … Sat=6
+# ─── Israel time (auto DST: UTC+3 Mar-Oct, UTC+2 Nov-Feb) ──────────────────
+_utc = datetime.now(timezone.utc)
+IL_OFFSET = 3 if 3 <= _utc.month <= 10 else 2
+now_il  = _utc + timedelta(hours=IL_OFFSET)
+dow     = (now_il.weekday() + 1) % 7   # Sun=0, Mon=1 … Sat=6
+cur_min = now_il.hour * 60 + now_il.minute
+print(f'Israel time: {now_il.strftime("%A %H:%M")}  dow={dow}  UTC+{IL_OFFSET}')
 
-# Map cron-string → 'digest' | (deadline_hour, is_warning)
-SLOT_MAP = {
-    '30 4 * * 0,1,2,3,4,5': 'digest',
-    # warn 30 min before deadline
-    '30 5 * * 0,1,2,3':   (9,  True),
-    '30 5 * * 5':          (9,  True),
-    '30 6 * * 0,1,2,3':   (10, True),
-    '30 6 * * 5':          (10, True),
-    '30 7 * * 0,1,2,3,4': (11, True),
-    '30 8 * * 0,1,2,3,4': (12, True),
-    '30 9 * * 2,4':        (13, True),
-    # at deadline
-    '0 6 * * 0,1,2,3':    (9,  False),
-    '0 6 * * 5':           (9,  False),
-    '0 7 * * 0,1,2,3':    (10, False),
-    '0 7 * * 5':           (10, False),
-    '0 8 * * 0,1,2,3,4':  (11, False),
-    '0 9 * * 0,1,2,3,4':  (12, False),
-    '0 10 * * 2,4':        (13, False),
-}
-
+# ─── Schedule (must match index.html SCH exactly) ───────────────────────────
 SCH = {
-    0: [  # ראשון — Sunday
-        ( 9, 0, 'עופות',                 '🐔'),
-        (10, 0, 'שוהם ירקות',            '🥦'),
-        (10, 0, 'שוהם מצוננים',          '🧀'),
-        (11, 0, 'קוקה קולה',             '🍾'),
-        (11, 0, 'טמפו',                  '🍾'),
-        (11, 0, 'יפאורה',                '🍵'),
-        (12, 0, 'מודיעין מכולת / Green', '🥫'),
-        (12, 0, 'פארם',                  '🧴'),
+    0: [  # Sunday
+        {'nm': 'שוהם מצוננים 6031',    'dl': '09:05', 'ic': '🐔', 'nt': 'עוף טרי'},
+        {'nm': 'שוהם קטיף 6032',       'dl': '10:05', 'ic': '🧊', 'nt': '15° / 4° / מכולת'},
+        {'nm': 'ראשון לציון 6000',     'dl': '12:05', 'ic': '🏭', 'nt': 'מכולת / מאפית / פארם / NF'},
+        {'nm': 'שוהם קטיף — משוקלד',  'dl': '12:05', 'ic': '🍫', 'nt': 'משוקלד'},
     ],
-    1: [  # שני — Monday
-        ( 9, 0, 'עופות',                 '🐔'),
-        (10, 0, 'שוהם ירקות',            '🥦'),
-        (11, 0, 'יפאורה',                '🍵'),
-        (12, 0, 'רשל"ץ כלי ניקיון',     '🧹'),
-        (12, 0, 'משוקלדים',              '🍫'),
+    1: [  # Monday
+        {'nm': 'שוהם מצוננים 6031',    'dl': '09:05', 'ic': '🐔', 'nt': 'עוף טרי'},
+        {'nm': 'שוהם מצוננים 6031',    'dl': '10:05', 'ic': '🥩', 'nt': 'בשר / חלב / נקניקים'},
+        {'nm': 'שוהם קטיף 6032',       'dl': '10:05', 'ic': '🧊', 'nt': '15° / 4° / מכולת'},
+        {'nm': 'מודיעין 6030',          'dl': '12:05', 'ic': '🏪', 'nt': 'גרין / מכולת / פארם / NF'},
+        {'nm': 'יפאורה',                'dl': '15:00', 'ic': '🍵', 'nt': ''},
     ],
-    2: [  # שלישי — Tuesday
-        ( 9, 0, 'עופות',                 '🐔'),
-        (10, 0, 'שוהם ירקות',            '🥦'),
-        (11, 0, 'קוקה קולה',             '🍾'),
-        (11, 0, 'טמפו',                  '🍾'),
-        (12, 0, 'מודיעין מכולת / Green', '🥫'),
-        (12, 0, 'רשל"ץ כלי ניקיון',     '🧹'),
-        (12, 0, 'פארם',                  '🧴'),
-        (12, 0, 'משוקלדים',              '🍫'),
-        (13, 0, 'מאפית',                 '🍞'),
+    2: [  # Tuesday
+        {'nm': 'שוהם מצוננים 6031',    'dl': '09:05', 'ic': '🐔', 'nt': 'עוף טרי'},
+        {'nm': 'שוהם מצוננים 6031',    'dl': '10:05', 'ic': '🥐', 'nt': 'חומרי עזר מאפית'},
+        {'nm': 'שוהם קטיף 6032',       'dl': '10:05', 'ic': '🧊', 'nt': '15° / 4° / מכולת'},
+        {'nm': 'ראשון לציון 6000',     'dl': '12:05', 'ic': '🏭', 'nt': 'מכולת / מאפית / פארם / NF'},
+        {'nm': 'לב הארץ 6047',         'dl': '12:05', 'ic': '🌿', 'nt': 'גרין / מכולת / פארם / NF / משוקלד'},
+        {'nm': 'טמפו',                  'dl': '13:00', 'ic': '🍾', 'nt': ''},
+        {'nm': 'שוהם קפואים 6033',     'dl': '13:05', 'ic': '❄️', 'nt': 'קפואים + חומ"ז מאפית'},
+        {'nm': 'קוקה קולה',             'dl': '17:00', 'ic': '🥤', 'nt': ''},
     ],
-    3: [  # רביעי — Wednesday
-        ( 9, 0, 'עופות',                 '🐔'),
-        (10, 0, 'שוהם ירקות',            '🥦'),
-        (10, 0, 'שוהם מצוננים',          '🧀'),
-        (11, 0, 'יפאורה',                '🍵'),
-        (12, 0, 'מודיעין מכולת / Green', '🥫'),
-        (12, 0, 'רשל"ץ כלי ניקיון',     '🧹'),
-        (12, 0, 'משוקלדים',              '🍫'),
+    3: [  # Wednesday
+        {'nm': 'שוהם מצוננים 6031',    'dl': '09:05', 'ic': '🐔', 'nt': 'עוף טרי'},
+        {'nm': 'שוהם מצוננים 6031',    'dl': '10:05', 'ic': '🥩', 'nt': 'בשר / חלב / נקניקים'},
+        {'nm': 'שוהם קטיף 6032',       'dl': '10:05', 'ic': '🧊', 'nt': '15° / 4° / מכולת'},
+        {'nm': 'מודיעין 6030',          'dl': '12:05', 'ic': '🏪', 'nt': 'גרין / מכולת / פארם / NF'},
+        {'nm': 'שוהם קטיף — משוקלד',  'dl': '12:05', 'ic': '🍫', 'nt': 'משוקלד'},
+        {'nm': 'יפאורה',                'dl': '15:00', 'ic': '🍵', 'nt': ''},
     ],
-    4: [  # חמישי — Thursday
-        (11, 0, 'טמפו',                  '🍾'),
-        (12, 0, 'מודיעין מכולת / Green', '🥫'),
-        (12, 0, 'רשל"ץ כלי ניקיון',     '🧹'),
-        (12, 0, 'פארם',                  '🧴'),
-        (12, 0, 'משוקלדים',              '🍫'),
-        (13, 0, 'מאפית',                 '🍞'),
+    4: [  # Thursday
+        {'nm': 'שוהם מצוננים 6031',    'dl': '09:05', 'ic': '🐔', 'nt': 'עוף טרי'},
+        {'nm': 'שוהם מצוננים 6031',    'dl': '10:05', 'ic': '🥐', 'nt': 'חומרי עזר מאפית'},
+        {'nm': 'שוהם קטיף 6032',       'dl': '10:05', 'ic': '🧊', 'nt': '15° / 4° / מכולת'},
+        {'nm': 'ראשון לציון 6000',     'dl': '12:05', 'ic': '🏭', 'nt': 'מכולת / מאפית / פארם / NF'},
+        {'nm': 'לב הארץ 6047',         'dl': '12:05', 'ic': '🌿', 'nt': 'גרין / מכולת / פארם / NF / משוקלד'},
+        {'nm': 'טמפו',                  'dl': '13:00', 'ic': '🍾', 'nt': ''},
+        {'nm': 'שוהם קפואים 6033',     'dl': '13:05', 'ic': '❄️', 'nt': 'קפואים + חומ"ז מאפית'},
+        {'nm': 'קוקה קולה',             'dl': '18:00', 'ic': '🥤', 'nt': ''},
     ],
-    5: [  # שישי — Friday
-        ( 9, 0, 'שוהם ירקות',            '🥦'),
-        (10, 0, 'ירקות Green יבולי בר',  '🌿'),
-    ],
+    5: [], 6: [],
 }
 
-DAY_HE = {0:'ראשון', 1:'שני', 2:'שלישי', 3:'רביעי', 4:'חמישי', 5:'שישי', 6:'שבת'}
+# ─── Timing config ───────────────────────────────────────────────────────────
+REMIND_AT  = [40, 30, 20, 10, 0]   # minutes before deadline
+POST_EVERY = 10                     # after deadline: repeat every N minutes
+POST_MAX   = 120                    # stop after N minutes past deadline
+WINDOW     = 9                      # match window (absorbs GitHub Actions cron jitter)
 
+def dl_to_min(s):
+    h, m = map(int, s.split(':'))
+    return h * 60 + m
+
+def in_window(cur, target):
+    """True if cur is in [target, target+WINDOW)"""
+    return 0 <= cur - target < WINDOW
+
+# ─── Find due reminders ───────────────────────────────────────────────────────
 orders = SCH.get(dow, [])
-slot   = SLOT_MAP.get(trigger)
-
-print(f'trigger={repr(trigger)}  slot={slot}  dow={dow}  time={now_il.strftime("%H:%M")} IDT')
-
-if slot is None:
-    print('Unknown trigger — nothing to send.')
+if not orders:
+    print('No orders today. Exiting.')
     sys.exit(0)
 
-if slot == 'digest':
-    if not orders:
-        print('No orders today.')
-        sys.exit(0)
-    lines = [f'יום {DAY_HE[dow]} — הזמנות היום:']
-    for (dh, dm, name, icon) in orders:
-        lines.append(f'{icon} {name} — עד {dh:02d}:{dm:02d}')
-    title = '📦 הזמנות סחורה — בוקר טוב'
-    body  = '\n'.join(lines)
-else:
-    target_h, is_warning = slot
-    matched = [(name, icon) for (dh, dm, name, icon) in orders if dh == target_h]
-    if not matched:
-        print(f'No orders at {target_h}:00 today (dow={dow}).')
-        sys.exit(0)
-    if is_warning:
-        msg = f'עוד 30 דקות! עד {target_h:02d}:00'
+groups = defaultdict(list)   # dl_str → [(item, is_overdue)]
+
+for item in orders:
+    dl = dl_to_min(item['dl'])
+
+    # Pre-deadline: fire at dl-40, dl-30, dl-20, dl-10, dl
+    fired = False
+    for offset in REMIND_AT:
+        if in_window(cur_min, dl - offset):
+            groups[item['dl']].append((item, False))
+            fired = True
+            break
+
+    if not fired:
+        # Post-deadline: fire at dl+10, dl+20, … up to dl+POST_MAX
+        mins_over = cur_min - dl
+        if 0 < mins_over <= POST_MAX:
+            slot_start = (mins_over // POST_EVERY) * POST_EVERY
+            if in_window(cur_min, dl + slot_start):
+                groups[item['dl']].append((item, True))
+
+if not groups:
+    print(f'Nothing due at {now_il.strftime("%H:%M")}. Exiting.')
+    sys.exit(0)
+
+# ─── Build and send one push per deadline slot ────────────────────────────────
+APP_ID  = os.environ['ONESIGNAL_APP_ID']
+API_KEY = os.environ['ONESIGNAL_API_KEY']
+
+for dl_str, entries in groups.items():
+    dl       = dl_to_min(dl_str)
+    diff     = dl - cur_min
+    is_over  = entries[0][1]
+
+    if not is_over:
+        if diff <= 1:
+            title = f'⚠️ הזמן עכשיו! מועד אחרון — {dl_str}'
+            sub   = f'הגיע הזמן! עד {dl_str}'
+        else:
+            title = f'📦 תזכורת הזמנה — עוד {diff} דקות'
+            sub   = f'עד {dl_str} (נותרו {diff} דקות)'
     else:
-        msg = f'⚠️ הגיע הזמן! עד {target_h:02d}:00'
-    lines = [f'{icon} {name} — {msg}' for (name, icon) in matched]
-    title = '📦 הזמנות סחורה'
-    body  = '\n'.join(lines)
+        late = cur_min - dl
+        title = f'🚨 עבר המועד! {dl_str} — לפני {late} דק׳'
+        sub   = f'⚠️ איחור {late} דקות — הזמן מיד!'
 
-print(f'Sending:\n{body}')
+    item_lines = []
+    for (item, _) in entries:
+        line = f"{item['ic']} {item['nm']}"
+        if item['nt']:
+            line += f"  ·  {item['nt']}"
+        item_lines.append(line)
 
-payload = json.dumps({
-    'app_id':            os.environ['ONESIGNAL_APP_ID'],
-    'included_segments': ['All'],
-    'headings':  {'he': title, 'en': title},
-    'contents':  {'he': body,  'en': body},
-    'url':       'https://evgenchuk1.github.io/order-schedule/',
-    'priority':  10,
-}).encode()
+    body = sub + '\n' + '\n'.join(item_lines)
+    print(f'--- Sending ---\n{title}\n{body}\n')
 
-req = urllib.request.Request(
-    'https://onesignal.com/api/v1/notifications',
-    data=payload,
-    headers={
-        'Content-Type':  'application/json',
-        'Authorization': f'Basic {os.environ["ONESIGNAL_API_KEY"]}',
-    }
-)
-with urllib.request.urlopen(req) as resp:
-    r = json.loads(resp.read())
-    print(f'Sent to {r.get("recipients", 0)} device(s). id={r.get("id")}')
+    payload = json.dumps({
+        'app_id':                 APP_ID,
+        'included_segments':      ['All'],
+        'headings':               {'he': title, 'en': title},
+        'contents':               {'he': body,  'en': body},
+        'url':                    'https://evgenchuk1.github.io/order-schedule/',
+        'priority':               10,
+        'ios_interruption_level': 'time-sensitive',
+        'ios_badgeType':          'Increase',
+        'ios_badgeCount':         1,
+    }, ensure_ascii=False).encode('utf-8')
+
+    req = urllib.request.Request(
+        'https://onesignal.com/api/v1/notifications',
+        data=payload,
+        headers={
+            'Content-Type':  'application/json; charset=utf-8',
+            'Authorization': f'Basic {API_KEY}',
+        }
+    )
+    try:
+        with urllib.request.urlopen(req) as resp:
+            r = json.loads(resp.read())
+            print(f'Delivered to {r.get("recipients", 0)} device(s). id={r.get("id")}')
+    except urllib.error.HTTPError as e:
+        print(f'HTTP {e.code}: {e.read().decode()}')
+        sys.exit(1)
+    except Exception as e:
+        print(f'Error: {e}')
+        sys.exit(1)
