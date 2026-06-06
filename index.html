@@ -885,20 +885,31 @@ function showToast(msg,dur=3500){
 }
 
 async function tryOneSignalOptIn(){
+  const log = [];
   try{
-    if(window.OneSignal && OneSignal.User && OneSignal.User.PushSubscription){
-      if(!OneSignal.User.PushSubscription.optedIn){
-        // Request native iOS permission if not yet granted
-        if(Notification.permission !== 'granted'){
-          await OneSignal.Notifications.requestPermission();
-        }
-        // Explicitly complete OneSignal subscription (required on iOS PWA)
-        await OneSignal.User.PushSubscription.optIn();
+    log.push('OS:'+(window.OneSignal?'ok':'missing'));
+    if(!window.OneSignal){ showToast('⚠️ OneSignal SDK לא נטען',4000); return; }
+
+    log.push('perm:'+Notification.permission);
+    log.push('optedIn:'+(OneSignal.User?.PushSubscription?.optedIn));
+
+    if(!OneSignal.User?.PushSubscription?.optedIn){
+      if(Notification.permission!=='granted'){
+        log.push('requestPerm...');
+        await OneSignal.Notifications.requestPermission();
+        log.push('perm_after:'+Notification.permission);
       }
+      log.push('optIn()...');
+      await OneSignal.User.PushSubscription.optIn();
+      log.push('optIn_done');
     }
-  }catch(e){ console.warn('OneSignal optIn error:', e); }
-  // Give OneSignal a moment to update subscription state
-  await new Promise(r => setTimeout(r, 800));
+    log.push('optedIn_final:'+(OneSignal.User?.PushSubscription?.optedIn));
+  }catch(e){
+    log.push('ERR:'+e.message);
+    showToast('❌ שגיאה: '+e.message, 6000);
+  }
+  showToast('🔔 '+log.join(' | '), 7000);
+  await new Promise(r=>setTimeout(r,800));
   syncBellIcon();
 }
 
@@ -906,12 +917,12 @@ async function handleBell() {
   unlockAudio();
 
   if(!('Notification' in window)){
-    showToast('הדפדפן שלך לא תומך בהתראות. התקן כ-PWA דרך Safari → שתף → הוסף למסך הבית');
+    showToast('⚠️ הדפדפן לא תומך בהתראות — התקן כ-PWA דרך Safari');
     return;
   }
 
   if(Notification.permission==='denied'){
-    showToast('⚠️ התראות חסומות. הגדרות → Safari → התראות → אפשר',5000);
+    showToast('⚠️ חסום ← הגדרות → הזמנות → התראות → אפשר', 5000);
     return;
   }
 
@@ -919,16 +930,14 @@ async function handleBell() {
     const p=await Notification.requestPermission();
     if(p==='granted'){
       await tryOneSignalOptIn();
-      showToast('✅ התראות פעילות!');
     } else {
-      showToast('❌ ההרשאה נדחתה. לא ניתן לשלוח התראות.');
+      showToast('❌ ההרשאה נדחתה');
     }
     return;
   }
 
-  // Already granted — ensure OneSignal is also subscribed
+  // Already granted
   await tryOneSignalOptIn();
-  showToast('🔔 התראות פעילות!', 5000);
 }
 
 // ═══════════════════════════════════════════
