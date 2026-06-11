@@ -54,8 +54,24 @@ def save_state(state):
 state = load_state()
 today_fired = state.get(today_str, {})
 
-# ─── ntfy.sh topic ───────────────────────────────────────────────────────────
-NTFY_TOPIC = 'hazmana-208-nahal-ora'
+# ─── Channels ────────────────────────────────────────────────────────────────
+NTFY_TOPIC       = 'hazmana-208-nahal-ora'
+TELEGRAM_TOKEN   = '8445627382:AAHtPl2bAWhkyiqdy29PgsoCBgGxyn8HWiI'
+TELEGRAM_CHAT_ID = '8290509506'
+
+def send_telegram(text):
+    url  = f'https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage'
+    data = json.dumps({'chat_id': TELEGRAM_CHAT_ID, 'text': text,
+                       'parse_mode': 'HTML'},
+                      ensure_ascii=False).encode('utf-8')
+    req  = urllib.request.Request(url, data=data,
+                                  headers={'Content-Type': 'application/json; charset=utf-8'})
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            r = json.loads(resp.read())
+            print(f'Telegram: ok={r.get("ok")}  msg_id={r.get("result",{}).get("message_id")}')
+    except Exception as e:
+        print(f'Telegram error: {e}')
 
 # ─── Schedule (must match index.html SCH exactly) ───────────────────────────
 SCH = {
@@ -188,6 +204,7 @@ for dl_str, entries in groups.items():
     body = sub + '\n' + '\n'.join(item_lines)
     print(f'--- Sending ---\n{title}\n{body}\n')
 
+    # ── ntfy.sh ──────────────────────────────────────────────────────────────
     payload = json.dumps({
         'topic':    NTFY_TOPIC,
         'title':    title,
@@ -202,15 +219,20 @@ for dl_str, entries in groups.items():
         headers={'Content-Type': 'application/json; charset=utf-8'},
     )
     try:
-        with urllib.request.urlopen(req) as resp:
+        with urllib.request.urlopen(req, timeout=10) as resp:
             r = json.loads(resp.read())
-            print(f'Sent: id={r.get("id")}  event={r.get("event")}')
-    except urllib.error.HTTPError as e:
-        print(f'HTTP {e.code}: {e.read().decode()}')
-        sys.exit(1)
+            print(f'ntfy: id={r.get("id")}')
     except Exception as e:
-        print(f'Error: {e}')
-        sys.exit(1)
+        print(f'ntfy error: {e}')
+
+    # ── Telegram (reliable native iOS push via APNS) ─────────────────────────
+    tg_lines = [f'<b>📋 הזמנות 208 — {title}</b>', '']
+    for (item, _) in entries:
+        line = f"{item['ic']} <b>{item['nm']}</b>"
+        if item['nt']:
+            line += f"  · {item['nt']}"
+        tg_lines.append(line)
+    send_telegram('\n'.join(tg_lines))
 
 # Save state only after all notifications sent successfully
 save_state({today_str: today_fired})
