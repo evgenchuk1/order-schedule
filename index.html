@@ -408,6 +408,13 @@ const SCH = {
   ],
 };
 
+// One-time test order: Ferrari 11:00, June 11 2026 only
+(function(){
+  const d=new Date();
+  const s=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  if(s==='2026-06-11') SCH[4].unshift({id:'s4_ferrari_oneshot',nm:'פרארי — טסט חד פעמי',dl:'11:00',dlDay:'טסט',nt:'הזמנת בדיקה',ic:'🏎️',cl:'coral'});
+})();
+
 // ═══════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════
