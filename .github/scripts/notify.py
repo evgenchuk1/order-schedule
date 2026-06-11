@@ -3,11 +3,27 @@ from datetime import datetime, timezone, timedelta
 from collections import defaultdict
 from pathlib import Path
 
-# Force UTF-8 output (needed on Windows with non-UTF console)
+# Force UTF-8 output + tee to log file
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 if hasattr(sys.stderr, 'reconfigure'):
     sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+
+LOG_FILE = Path(__file__).resolve().parent.parent.parent / 'notify.log'
+
+class _Tee:
+    def __init__(self, *streams): self._s = streams
+    def write(self, d):
+        for s in self._s: s.write(d)
+    def flush(self):
+        for s in self._s: s.flush()
+
+try:
+    _log = open(LOG_FILE, 'a', encoding='utf-8')
+    sys.stdout = _Tee(sys.stdout, _log)
+    sys.stderr = _Tee(sys.stderr, _log)
+except Exception:
+    pass
 
 # ─── Israel time (auto DST: UTC+3 Mar-Oct, UTC+2 Nov-Feb) ──────────────────
 _utc = datetime.now(timezone.utc)
