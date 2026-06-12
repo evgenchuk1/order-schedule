@@ -36,18 +36,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .home-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
            padding:0 14px max(24px,env(safe-area-inset-bottom));}
 
-.main-card{border-radius:22px;padding:0;margin-bottom:14px;cursor:pointer;
+.main-card{border-radius:44px;padding:0;margin-bottom:28px;cursor:pointer;
            box-shadow:0 5px 20px rgba(0,0,0,.14);overflow:hidden;
            transition:transform .14s,box-shadow .14s;
            display:flex;align-items:stretch;}
 .main-card:active{transform:scale(.97);box-shadow:0 2px 8px rgba(0,0,0,.1);}
-.main-card-accent{width:7px;flex-shrink:0;}
-.main-card-inner{flex:1;padding:18px 16px 18px 14px;display:flex;align-items:center;gap:14px;background:#fff;}
-.main-card-icon{font-size:40px;width:52px;text-align:center;flex-shrink:0;}
+.main-card-accent{width:14px;flex-shrink:0;}
+.main-card-inner{flex:1;padding:36px 32px 36px 28px;display:flex;align-items:center;gap:28px;background:#fff;}
+.main-card-icon{font-size:80px;width:104px;text-align:center;flex-shrink:0;}
 .main-card-text{flex:1;}
-.main-card-name{font-size:24px;font-weight:800;}
-.main-card-sub{font-size:13px;color:#666;margin-top:3px;}
-.main-card-pill{border-radius:20px;padding:5px 12px;font-size:13px;font-weight:700;
+.main-card-name{font-size:48px;font-weight:800;}
+.main-card-sub{font-size:26px;color:#666;margin-top:6px;}
+.main-card-pill{border-radius:40px;padding:10px 24px;font-size:26px;font-weight:700;
                 white-space:nowrap;flex-shrink:0;}
 
 .c-chor .main-card-accent{background:linear-gradient(#0F9B8E,#0A7A6E);}
@@ -100,6 +100,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
           box-shadow:0 2px 8px rgba(0,0,0,.07);}
 .day-card.is-today{box-shadow:0 4px 18px rgba(15,155,142,.3);
                    outline:2.5px solid #0F9B8E;}
+.day-card.is-next{box-shadow:0 4px 20px rgba(231,76,60,.35);
+                  outline:3px solid #E74C3C;}
+.day-card.is-next .day-hdr-name{font-size:25px;}
+.day-card.is-next .day-chip{font-size:17px;}
 .day-hdr{padding:13px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .day-hdr-name{font-size:21px;font-weight:800;color:#fff;flex:1;}
 .day-hdr-count{background:rgba(255,255,255,.22);color:#fff;border-radius:10px;
@@ -125,6 +129,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .tl-item.is-past{opacity:.42;}
 .tl-item.is-today{outline:2.5px solid var(--acc);
                   box-shadow:0 4px 16px rgba(0,0,0,.12);}
+.tl-item.is-next{outline:3px solid #E74C3C;
+                 box-shadow:0 4px 18px rgba(231,76,60,.22);}
+.tl-item.is-next .tl-dd{font-size:32px;}
+.tl-item.is-next .tl-chip{font-size:17px;font-weight:600;}
 .tl-item.is-delayed{opacity:.5;}
 .tl-left{min-width:46px;text-align:center;}
 .tl-dd{font-size:26px;font-weight:900;color:var(--acc);line-height:1.1;}
@@ -286,54 +294,54 @@ const PACHAT = [
 /* יומי — 10-week cycle (Sun/Mon/Tue/Wed) */
 const YOMI = [
   // שבוע 1 — נדחה
-  {d:"2026-05-17", w:1, dn:"א", delay:true,  items:["אורז, קטניות, פירורי לחם, קוסקוס"]},
-  {d:"2026-05-18", w:1, dn:"ב", delay:true,  items:["חטיפים"]},
-  {d:"2026-05-19", w:1, dn:"ג", delay:true,  items:["כביסה"]},
-  {d:"2026-05-20", w:1, dn:"ד", delay:true,  items:["מדיח"]},
+  {d:"2026-05-17", w:1, dn:"א", delay:true,  items:["סבונים"]},
+  {d:"2026-05-18", w:1, dn:"ב", delay:true,  items:["יין"]},
+  {d:"2026-05-19", w:1, dn:"ג", delay:true,  items:["חטיפי דגנים"]},
+  {d:"2026-05-20", w:1, dn:"ד", delay:true,  items:["קפה"]},
   // שבוע 2
-  {d:"2026-05-24", w:2, dn:"א", items:["אסלות, אקונומיקה, רצפה וכללי"]},
-  {d:"2026-05-25", w:2, dn:"ב", items:["דגני בוקר"], special:"חלב וסלטים"},
-  {d:"2026-05-26", w:2, dn:"ג", items:["שקיות"]},
-  {d:"2026-05-27", w:2, dn:"ד", items:["בירה"]},
+  {d:"2026-05-24", w:2, dn:"א", items:["אורז, קטניות, פירורי לחם, קוסקוס"]},
+  {d:"2026-05-25", w:2, dn:"ב", items:["חטיפים"], special:"חלב וסלטים"},
+  {d:"2026-05-26", w:2, dn:"ג", items:["כביסה"]},
+  {d:"2026-05-27", w:2, dn:"ד", items:["מדיח"]},
   // שבוע 3
-  {d:"2026-05-31", w:3, dn:"א", items:["היגיינה נשית, נייר טואלט"]},
-  {d:"2026-06-01", w:3, dn:"ב", items:["עוגיות וביסקוויטים"]},
-  {d:"2026-06-02", w:3, dn:"ג", items:["בייגלה"]},
-  {d:"2026-06-03", w:3, dn:"ד", items:["פריכיות"]},
+  {d:"2026-05-31", w:3, dn:"א", items:["אסלות, אקונומיקה, רצפה וכללי"]},
+  {d:"2026-06-01", w:3, dn:"ב", items:["דגני בוקר"]},
+  {d:"2026-06-02", w:3, dn:"ג", items:["שקיות"]},
+  {d:"2026-06-03", w:3, dn:"ד", items:["בירה"]},
   // שבוע 4
-  {d:"2026-06-07", w:4, dn:"א", items:["שמן זית, שמנים"]},
-  {d:"2026-06-08", w:4, dn:"ב", items:['משק"ל']},
-  {d:"2026-06-09", w:4, dn:"ג", items:["רטבים"]},
-  {d:"2026-06-10", w:4, dn:"ד", items:["חרדל, טחינה, מיונז"]},
+  {d:"2026-06-07", w:4, dn:"א", items:["היגיינה נשית, נייר טואלט"]},
+  {d:"2026-06-08", w:4, dn:"ב", items:["עוגיות וביסקוויטים"]},
+  {d:"2026-06-09", w:4, dn:"ג", items:["בייגלה"]},
+  {d:"2026-06-10", w:4, dn:"ד", items:["פריכיות"]},
   // שבוע 5
-  {d:"2026-06-14", w:5, dn:"א", items:["שימורי דגים, שימורי ירקות"]},
-  {d:"2026-06-15", w:5, dn:"ב", items:["היגיינת הפה"]},
-  {d:"2026-06-16", w:5, dn:"ג", items:["מתוקים"]},
-  {d:"2026-06-17", w:5, dn:"ד", items:["משקאות חריפים"]},
+  {d:"2026-06-14", w:5, dn:"א", items:["שמן זית, שמנים"]},
+  {d:"2026-06-15", w:5, dn:"ב", items:['משק"ל']},
+  {d:"2026-06-16", w:5, dn:"ג", items:["רטבים"]},
+  {d:"2026-06-17", w:5, dn:"ד", items:["חרדל, טחינה, מיונז"]},
   // שבוע 6
-  {d:"2026-06-21", w:6, dn:"א", items:["כבושים, מוצרי עגבניה"]},
-  {d:"2026-06-22", w:6, dn:"ב", items:["פסטה"], special:"חלב וסלטים"},
-  {d:"2026-06-23", w:6, dn:"ג", items:["תה"]},
-  {d:"2026-06-24", w:6, dn:"ד", items:["ופלים"]},
+  {d:"2026-06-21", w:6, dn:"א", items:["שימורי דגים, שימורי ירקות"]},
+  {d:"2026-06-22", w:6, dn:"ב", items:["היגיינת הפה"], special:"חלב וסלטים"},
+  {d:"2026-06-23", w:6, dn:"ג", items:["מתוקים"]},
+  {d:"2026-06-24", w:6, dn:"ד", items:["משקאות חריפים"]},
   // שבוע 7
-  {d:"2026-06-28", w:7, dn:"א", items:["מטליות, נייר מגבת"]},
-  {d:"2026-06-29", w:7, dn:"ב", items:["מוצרי אפייה"]},
-  {d:"2026-06-30", w:7, dn:"ג", items:["מרקים ותבשילים"]},
-  {d:"2026-07-01", w:7, dn:"ד", items:['בע"ח']},
+  {d:"2026-06-28", w:7, dn:"א", items:["כבושים, מוצרי עגבניה"]},
+  {d:"2026-06-29", w:7, dn:"ב", items:["פסטה"]},
+  {d:"2026-06-30", w:7, dn:"ג", items:["תה"]},
+  {d:"2026-07-01", w:7, dn:"ד", items:["ופלים"]},
   // שבוע 8
-  {d:"2026-07-05", w:8, dn:"א", items:["אלומיניום, מוצרי יסוד"]},
-  {d:"2026-07-06", w:8, dn:"ב", items:["שמפו"]},
-  {d:"2026-07-07", w:8, dn:"ג", items:["ניקוי כלים"]},
-  {d:"2026-07-08", w:8, dn:"ד", items:["נקטר, סירופים ופחיות"]},
+  {d:"2026-07-05", w:8, dn:"א", items:["מטליות, נייר מגבת"]},
+  {d:"2026-07-06", w:8, dn:"ב", items:["מוצרי אפייה"]},
+  {d:"2026-07-07", w:8, dn:"ג", items:["מרקים ותבשילים"]},
+  {d:"2026-07-08", w:8, dn:"ד", items:['בע"ח']},
   // שבוע 9
-  {d:"2026-07-12", w:9, dn:"א", items:["מזון תינוקות, חיתולים"]},
-  {d:"2026-07-13", w:9, dn:"ב", items:["דבש, ריבה, ממרח"]},
-  {d:"2026-07-14", w:9, dn:"ג", items:["דאודורנטים"]},
-  {d:"2026-07-15", w:9, dn:"ד", items:["מגבונים"]},
+  {d:"2026-07-12", w:9, dn:"א", items:["אלומיניום, מוצרי יסוד"]},
+  {d:"2026-07-13", w:9, dn:"ב", items:["שמפו"]},
+  {d:"2026-07-14", w:9, dn:"ג", items:["ניקוי כלים"]},
+  {d:"2026-07-15", w:9, dn:"ד", items:["נקטר, סירופים ופחיות"]},
   // שבוע 10
-  {d:"2026-07-19", w:10, dn:"א", items:["יין"]},
-  {d:"2026-07-20", w:10, dn:"ב", items:["חטיפי דגנים"]},
-  {d:"2026-07-21", w:10, dn:"ג", items:["קפה"]},
+  {d:"2026-07-19", w:10, dn:"א", items:["מזון תינוקות, חיתולים"]},
+  {d:"2026-07-20", w:10, dn:"ב", items:["דבש, ריבה, ממרח"]},
+  {d:"2026-07-21", w:10, dn:"ג", items:["דאודורנטים"]},
   {d:"2026-07-22", w:10, dn:"ד", items:["מגבונים"]},
 ];
 
@@ -439,11 +447,13 @@ function renderChor(){
     const ad=(a.dow-dow+7)%7, bd=(b.dow-dow+7)%7;
     return ad-bd;
   });
+  const nearestDow=sorted[0].dow;
 
   let h='';
   for(const d of sorted){
     const today=d.dow===dow;
-    h+=`<div class="day-card${today?' is-today':''}">
+    const isNearest=d.dow===nearestDow;
+    h+=`<div class="day-card${today?' is-today':''}${isNearest?' is-next':''}">
       <div class="day-hdr ${d.hdr}">
         <span class="day-hdr-name">יום ${d.day}׳</span>
         <span class="day-hdr-count">${d.items.length} פלנוגרמות</span>
@@ -467,12 +477,14 @@ function renderChor(){
 // ═══════════════════════════════════════════
 function renderPachat(){
   const ts=todayStr();
+  const nextEntry=PACHAT.find(p=>p.d>=ts);
   let h='';
   for(const p of PACHAT){
     const dd=parseD(p.d);
     const dif=diff(p.d);
     const past=p.d<ts, today=p.d===ts;
-    const cls=['tl-item',past?'is-past':'',today?'is-today':''].filter(Boolean).join(' ');
+    const isNext=p===nextEntry;
+    const cls=['tl-item',past?'is-past':'',today?'is-today':'',isNext?'is-next':''].filter(Boolean).join(' ');
     h+=`<div class="${cls}">
       <div class="tl-left">
         <div class="tl-dd">${dd.getDate()}</div>
@@ -500,17 +512,21 @@ function renderPachat(){
 // ═══════════════════════════════════════════
 function renderYomi(){
   const ts=todayStr();
+  const nextEntry=YOMI.find(y=>y.d>=ts&&!y.delay&&y.items.length>0);
   let h='', curW=0;
   for(const y of YOMI){
     if(!y.items.length) continue;
     const dd=parseD(y.d);
     const past=y.d<ts, today=y.d===ts;
+    const isNext=y===nextEntry;
     if(y.w!==curW){
       if(curW) h+='';
       curW=y.w;
       h+=`<div class="tl-week-lbl">${y.w===1?'שבוע 1 — נדחה ⏸':'שבוע '+y.w}</div>`;
     }
-    const cls=['tl-item',past?'is-past':'',today?'is-today':'',y.delay?'is-delayed':''].filter(Boolean).join(' ');
+    const cls=['tl-item',past?'is-past':'',today?'is-today':'',y.delay?'is-delayed':'',isNext?'is-next':''].filter(Boolean).join(' ');
+    const sundayExtra=(!y.delay&&y.dn==='א')?['עגלות לקוחות','מזון תינוקות']:[];
+    const allItems=[...y.items,...sundayExtra];
     h+=`<div class="${cls}">
       <div class="tl-left">
         <div class="tl-dd">${dd.getDate()}</div>
@@ -524,7 +540,7 @@ function renderYomi(){
           ${today?'<span class="tl-today-tag">📍 היום</span>':''}
         </div>
         <div class="tl-chips">
-          ${y.items.map(i=>`<span class="tl-chip">${i}</span>`).join('')}
+          ${allItems.map(i=>`<span class="tl-chip">${i}</span>`).join('')}
         </div>
       </div>
     </div>`;
