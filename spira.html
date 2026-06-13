@@ -803,7 +803,8 @@ function renderRikuz(){
     }
   }
 
-  h+=`<button class="rik-email-btn" onclick="sendRikuzEmail()">📧 שלח לצוות ההנהלה</button>`;
+  h+=`<button id="forceSendBtn" class="rik-email-btn" onclick="forceSendNow()" style="background:#1B4F72;color:#fff;font-size:22px;padding:18px;">📧 שלח עכשיו לכל ההנהלה</button>`;
+  h+=`<button class="rik-email-btn" onclick="sendRikuzEmail()">📧 שלח סיכום ידני</button>`;
   h+=`<button class="rik-notif-btn" onclick="requestAndScheduleNotif()">🔔 הפעל תזכורות יומיות</button>`;
   document.getElementById('rikuzBody').innerHTML=h;
 }
@@ -913,7 +914,7 @@ function schedule14Email(){
 
 // ════ AUTOMATIC 06:30 MORNING EMAIL ════
 function scheduleMorningEmail(){
-  const key='spira_morning_sent_'+todayStr();
+  const key='spira_v2_morning_'+todayStr();
   if(localStorage.getItem(key)) return;
 
   const now=new Date();
@@ -941,11 +942,37 @@ function scheduleMorningEmail(){
   };
 
   if(delay<=0){
-    // already past 06:30 today — send now if not sent yet
     doSend();
   } else {
     setTimeout(doSend, delay);
   }
+}
+
+// כפתור שליחה ידנית — מנקה גם את הגנת השליחה היומית
+async function forceSendNow(){
+  const key='spira_v2_morning_'+todayStr();
+  localStorage.removeItem(key);
+  const emails=getMgmtEmails();
+  if(!emails.length){
+    alert('לא נמצאו כתובות מייל בטבלת הנהלת הסניף.\nאנא הזן כתובות ושמור.');
+    return;
+  }
+  const {subject,body}=buildEmailContent(false);
+  const btn=document.getElementById('forceSendBtn');
+  if(btn){btn.textContent='⏳ שולח...';btn.disabled=true;}
+  let ok=false;
+  if(ejsReady()){
+    ok=await sendViaEmailJS(emails,subject,body);
+  } else {
+    window.location.href='mailto:'+emails.join(',')+
+      '?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+    ok=true;
+  }
+  if(btn){
+    btn.textContent=ok?'✅ נשלח!':'❌ שגיאה';
+    btn.disabled=false;
+  }
+  if(ok) localStorage.setItem(key,'1');
 }
 
 // ═══ EMAILJS CONFIG — заполните после регистрации на emailjs.com ═══
