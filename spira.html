@@ -55,6 +55,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .c-yomi .main-card-name{color:#1A5276;}
 .c-yomi .main-card-pill{background:#EBF5FB;color:#1A5276;}
 
+/* ── Branch toggle ── */
+.branch-toggle{display:flex;gap:8px;margin-bottom:10px;}
+.branch-btn{border:2px solid rgba(255,255,255,.45);border-radius:22px;
+            padding:6px 18px;font-size:16px;font-weight:800;
+            color:rgba(255,255,255,.65);background:transparent;cursor:pointer;
+            transition:all .15s;}
+.branch-btn.active{background:#fff;color:#1B4F72;border-color:#fff;}
+
 /* ── ריכוז יומי home card ── */
 .rikuz-home-card{background:#fff;border-radius:22px;padding:22px 20px;margin-bottom:12px;
                  cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.1);
@@ -209,7 +217,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <!-- ═══ HOME ═══ -->
 <div class="screen active" id="home">
   <div class="home-top">
-    <div class="home-logo">🛒 שופרסל 208 — דיל נחל אורה</div>
+    <div class="branch-toggle">
+      <button class="branch-btn active" id="btn208" onclick="setBranch(208)">208</button>
+      <button class="branch-btn" id="btn118" onclick="setBranch(118)">118</button>
+    </div>
+    <div class="home-logo" id="homeLogo">🛒 שופרסל 208 — דיל נחל אורה</div>
     <div class="home-title">לוז ספירות</div>
     <div class="home-date" id="homeDate"></div>
     <div class="today-banner" id="todayBanner"></div>
@@ -434,6 +446,19 @@ const SPECIAL_DATES = {
     {id:'pachat_s', label:'פחת',          color:'#C0392B', detail:'גרילים ופחמים'},
   ]
 };
+
+// ═══ BRANCH SELECTOR ═══
+let currentBranch = parseInt(localStorage.getItem('spira_branch')||'208');
+
+function setBranch(b){
+  currentBranch = b;
+  localStorage.setItem('spira_branch', b);
+  document.getElementById('btn208').classList.toggle('active', b===208);
+  document.getElementById('btn118').classList.toggle('active', b===118);
+  document.getElementById('homeLogo').textContent =
+    b===208 ? '🛒 שופרסל 208 — דיל נחל אורה' : '🛒 שופרסל 118';
+  renderHome();
+}
 
 // ═══ HELPERS ═══
 function todayStr(){
@@ -670,10 +695,10 @@ function closeCopyright(){document.getElementById('cpOverlay').classList.remove(
 
 // ═══ הנהלת הסניף ═══
 const MGMT_ROLES = ['מנהל','סגן מנהל 1','סגן מנהל 2','סגן מנהל 3','קלדן','מנהל זמינות'];
-const HANHALA_KEY = 'spira_hanhala_v1';
+function hanhalaKey(){return 'spira_hanhala_'+currentBranch+'_v1';}
 
 function loadHanhala(){
-  try{return JSON.parse(localStorage.getItem(HANHALA_KEY))||{};}catch{return{};}
+  try{return JSON.parse(localStorage.getItem(hanhalaKey()))||{};}catch{return{};}
 }
 
 function renderHanhala(){
@@ -714,7 +739,7 @@ function saveHanhala(){
       email:(document.getElementById('mn_email_'+k)||{}).value||'',
     };
   }
-  localStorage.setItem(HANHALA_KEY,JSON.stringify(data));
+  localStorage.setItem(hanhalaKey(),JSON.stringify(data));
   const btn=document.querySelector('.mgmt-save-btn');
   if(btn){btn.textContent='✅ נשמר!';setTimeout(()=>btn.textContent='שמור הנהלה ✓',2000);}
 }
@@ -725,7 +750,7 @@ function openHanhala(){
 }
 
 // ═══ ריכוז יומי ═══
-function getRikuzKey(){return 'spira_rikuz_'+todayStr();}
+function getRikuzKey(){return 'spira_rikuz_'+currentBranch+'_'+todayStr();}
 
 function getTodaySections(){
   const ts=todayStr();
@@ -916,7 +941,7 @@ function schedule14Email(){
 
 // ════ AUTOMATIC 06:30 MORNING EMAIL ════
 function scheduleMorningEmail(){
-  const key='spira_v2_morning_'+todayStr();
+  const key='spira_v2_morning_'+currentBranch+'_'+todayStr();
   if(localStorage.getItem(key)) return;
 
   const now=new Date();
@@ -961,7 +986,7 @@ async function testTelegram(){
 }
 
 async function forceSendNow(){
-  const key='spira_v2_morning_'+todayStr();
+  const key='spira_v2_morning_'+currentBranch+'_'+todayStr();
   localStorage.removeItem(key);
   const emails=getMgmtEmails();
   if(!emails.length){
@@ -1109,6 +1134,14 @@ async function fireNotif(type){
 
 // ═══ INIT ═══
 if(ejsReady()) emailjs.init(EJS_KEY);
+// Restore branch UI state on load
+(function(){
+  const b=currentBranch;
+  document.getElementById('btn208').classList.toggle('active',b===208);
+  document.getElementById('btn118').classList.toggle('active',b===118);
+  document.getElementById('homeLogo').textContent=
+    b===208?'🛒 שופרסל 208 — דיל נחל אורה':'🛒 שופרסל 118';
+})();
 renderHome();
 renderChor();
 renderPachat();
