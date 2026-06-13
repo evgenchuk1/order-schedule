@@ -1011,12 +1011,13 @@ async function sendTelegram(text){
 
 function buildTgMorning(){
   const sections=getTodaySections();
+  const state=loadRikuzState();
   const ts=todayStr();
   const [y,m,d]=ts.split('-');
   const dateHe=Number(d)+' '+MON_F[Number(m)-1]+' '+y;
   let txt=`📋 <b>ריכוז ספירות — ${dateHe}</b>\n\n`;
   for(const s of sections){
-    txt+=`❌ <b>${s.label}</b>\n${s.detail}\n\n`;
+    txt+=(state[s.id]?'✅':'❌')+` <b>${s.label}</b>\n${s.detail}\n\n`;
   }
   return txt||'אין ספירות להיום';
 }
