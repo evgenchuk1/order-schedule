@@ -425,6 +425,15 @@ const YOMI = [
   {d:"2026-07-22", w:10, dn:"ד", items:["מגבונים"]},
 ];
 
+// ═══ SPECIAL ONE-TIME ITEMS (тест 13/06/2026) ═══
+const SPECIAL_DATES = {
+  '2026-06-13': [
+    {id:'chor_s',   label:'חור במדף',    color:'#0A7A6E', detail:'טלביזיות, מקררים, מאווררים, חשמל ביתי'},
+    {id:'yomi_s',   label:'ספירה יומית', color:'#1A5276', detail:'ירקות'},
+    {id:'pachat_s', label:'פחת',          color:'#C0392B', detail:'גרילים ופחמים'},
+  ]
+};
+
 // ═══ HELPERS ═══
 function todayStr(){
   const t=new Date();
@@ -753,7 +762,8 @@ function getTodaySections(){
     });
   }
 
-  return sections;
+  const special = SPECIAL_DATES[ts] || [];
+  return [...sections, ...special];
 }
 
 function loadRikuzState(){
@@ -821,32 +831,95 @@ function openRikuz(){
   document.getElementById('ovRikuz').classList.add('active');
 }
 
-// ═══ EMAIL VIA MAILTO ═══
-function sendRikuzEmail(){
+// ═══ EMAIL ═══
+function getMgmtEmails(){
+  const hanhala=loadHanhala();
+  return MGMT_ROLES
+    .map(r=>hanhala[r.replace(/\s/g,'_')]||{})
+    .map(e=>e.email||'')
+    .filter(Boolean);
+}
+
+function buildEmailContent(isSummary){
   const sections=getTodaySections();
   const state=loadRikuzState();
   const ts=todayStr();
   const [y,m,d]=ts.split('-');
   const dateHe=Number(d)+' '+MON_F[Number(m)-1]+' '+y;
 
-  const hanhala=loadHanhala();
-  const emails=MGMT_ROLES
-    .map(r=>hanhala[r.replace(/\s/g,'_')]||{})
-    .map(e=>e.email||'')
-    .filter(Boolean);
-
-  const subject=`ריכוז ספירות — ${dateHe}`;
-  let body=`ריכוז ספירות יומי — ${dateHe}\n\n`;
-  for(const sec of sections){
-    const done=state[sec.id];
-    body+=(done?'✅':'❌')+' '+sec.label+'\n'+sec.detail+'\n\n';
+  let subject, body;
+  if(!isSummary){
+    subject=`📋 ריכוז ספירות בוקר — ${dateHe}`;
+    body=`שלום,\n\nריכוז ספירות מתוכנן ל-${dateHe}:\n\n`;
+    for(const sec of sections){
+      body+='• '+sec.label+'\n  '+sec.detail+'\n\n';
+    }
+    body+='תאלצו להכניס V בתוכנה בסיום כל ספירה.\n\nלוז ספירות — שופרסל 208';
+  } else {
+    subject=`📊 סיכום ספירות 14:00 — ${dateHe}`;
+    const done=sections.filter(s=>state[s.id]);
+    const pending=sections.filter(s=>!state[s.id]);
+    body=`שלום,\n\nסיכום ספירות ל-${dateHe} (נכון לשעה 14:00):\n\n`;
+    if(done.length){
+      body+='✅ בוצע:\n'+done.map(s=>'  • '+s.label+': '+s.detail).join('\n')+'\n\n';
+    }
+    if(pending.length){
+      body+='❌ לא בוצע:\n'+pending.map(s=>'  • '+s.label).join('\n')+'\n\n';
+    }
+    if(!done.length&&!pending.length) body+='אין ספירות לדיווח.\n\n';
+    body+='לוז ספירות — שופרסל 208';
   }
-  body+='\nנשלח מיישום לוז ספירות — שופרסל 208';
+  return {subject, body};
+}
 
-  const link='mailto:'+emails.join(',')+
+function openMailto(isSummary){
+  const emails=getMgmtEmails();
+  if(!emails.length){
+    alert('לא הוגדרו כתובות מייל בטבלת הנהלת הסניף.\nאנא הזן כתובות מייל ונסה שוב.');
+    return;
+  }
+  // mark morning sent
+  if(!isSummary) localStorage.setItem('spira_morning_sent_'+todayStr(),'1');
+
+  const {subject,body}=buildEmailContent(isSummary);
+  window.location.href='mailto:'+emails.join(',')+
     '?subject='+encodeURIComponent(subject)+
     '&body='+encodeURIComponent(body);
-  window.location.href=link;
+}
+
+function sendRikuzEmail(){openMailto(false);}
+
+function schedule14Email(){
+  const now=new Date();
+  const fire=new Date(now.getFullYear(),now.getMonth(),now.getDate(),14,0,0,0);
+  const delay=fire-now;
+  if(delay<=0) return;
+  setTimeout(()=>{
+    const sections=getTodaySections();
+    const state=loadRikuzState();
+    const done=sections.filter(s=>state[s.id]);
+    if(!done.length) return; // nothing counted — don't send
+    if(confirm('שעה 14:00 — האם לשלוח סיכום ספירות בדואל?\n'+
+               done.map(s=>'✅ '+s.label).join('\n'))){
+      openMailto(true);
+    }
+  }, delay);
+}
+
+function sendMorningEmailIfNeeded(){
+  const key='spira_morning_sent_'+todayStr();
+  if(localStorage.getItem(key)) return;
+  const sections=getTodaySections();
+  if(!sections.length) return;
+  const emails=getMgmtEmails();
+  if(!emails.length) return;
+  // small delay so page finishes loading
+  setTimeout(()=>{
+    if(confirm('שלח מייל בוקר עם ריכוז ספירות לצוות הנהלה?\n'+
+               sections.map(s=>'• '+s.label+': '+s.detail).join('\n'))){
+      openMailto(false);
+    }
+  }, 800);
 }
 
 // ═══ NOTIFICATIONS ═══
@@ -916,6 +989,8 @@ renderChor();
 renderPachat();
 renderYomi();
 if(Notification.permission==='granted') scheduleNotifications();
+schedule14Email();
+sendMorningEmailIfNeeded();
 </script>
 </body>
 </html>
