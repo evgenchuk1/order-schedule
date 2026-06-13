@@ -803,8 +803,8 @@ function renderRikuz(){
     }
   }
 
-  h+=`<button id="forceSendBtn" class="rik-email-btn" onclick="forceSendNow()" style="background:#1B4F72;color:#fff;font-size:22px;padding:18px;">📧 שלח עכשיו לכל ההנהלה</button>`;
-  h+=`<button class="rik-email-btn" onclick="sendRikuzEmail()">📧 שלח סיכום ידני</button>`;
+  h+=`<button id="forceSendBtn" class="rik-email-btn" onclick="forceSendNow()" style="background:#1B4F72;color:#fff;font-size:22px;padding:18px;">📧 שלח עכשיו — מייל + טלגרם</button>`;
+  h+=`<button id="tgTestBtn" class="rik-notif-btn" onclick="testTelegram()" style="background:#229ED9;color:#fff;font-size:20px;padding:16px;">✈️ בדוק טלגרם עכשיו</button>`;
   h+=`<button class="rik-notif-btn" onclick="requestAndScheduleNotif()">🔔 הפעל תזכורות יומיות</button>`;
   document.getElementById('rikuzBody').innerHTML=h;
 }
@@ -902,14 +902,15 @@ function schedule14Email(){
     const state=loadRikuzState();
     const done=sections.filter(s=>state[s.id]);
     if(!done.length) return;
+    // email
     const emails=getMgmtEmails();
-    if(!emails.length) return;
-    const {subject,body}=buildEmailContent(true);
-    if(ejsReady()){
-      await sendViaEmailJS(emails,subject,body);
-    } else {
-      openMailto(true);
+    if(emails.length){
+      const {subject,body}=buildEmailContent(true);
+      if(ejsReady()) await sendViaEmailJS(emails,subject,body);
+      else openMailto(true);
     }
+    // Telegram
+    await sendTelegram(buildTgSummary());
   }, delay);
 }
 
@@ -940,6 +941,8 @@ function scheduleMorningEmail(){
       sent=true;
     }
     if(sent) localStorage.setItem(key,'1');
+  // Telegram morning message
+  await sendTelegram(buildTgMorning());
   };
 
   if(delay<=0){
@@ -950,6 +953,13 @@ function scheduleMorningEmail(){
 }
 
 // כפתור שליחה ידנית — מנקה גם את הגנת השליחה היומית
+async function testTelegram(){
+  const btn=document.getElementById('tgTestBtn');
+  if(btn){btn.textContent='⏳ שולח...';btn.disabled=true;}
+  const ok=await sendTelegram(buildTgMorning());
+  if(btn){btn.textContent=ok?'✅ נשלח בטלגרם!':'❌ שגיאה';btn.disabled=false;}
+}
+
 async function forceSendNow(){
   const key='spira_v2_morning_'+todayStr();
   localStorage.removeItem(key);
@@ -974,12 +984,65 @@ async function forceSendNow(){
     btn.disabled=false;
   }
   if(ok) localStorage.setItem(key,'1');
+  // also Telegram
+  await sendTelegram(buildTgMorning());
 }
 
-// ═══ EMAILJS CONFIG — заполните после регистрации на emailjs.com ═══
+// ═══ EMAILJS CONFIG ═══
 const EJS_KEY = 'i5xgb_9LOOvXR4YQq';
 const EJS_SVC = 'service_069inzf';
 const EJS_TPL = 'template_yyn53ke';
+
+// ═══ TELEGRAM CONFIG ═══
+const TG_TOKEN = '8803274567:AAHDgxwQwdJfTQdS49Vdof7C8RuWwDJk8p4';
+const TG_CHAT  = '-5283244241';
+
+async function sendTelegram(text){
+  if(!TG_TOKEN||!TG_CHAT) return false;
+  try{
+    const r=await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({chat_id:TG_CHAT,text,parse_mode:'HTML'})
+    });
+    return r.ok;
+  }catch(e){console.error('TG:',e);return false;}
+}
+
+function buildTgMorning(){
+  const sections=getTodaySections();
+  const ts=todayStr();
+  const [y,m,d]=ts.split('-');
+  const dateHe=Number(d)+' '+MON_F[Number(m)-1]+' '+y;
+  let txt=`📋 <b>ריכוז ספירות — ${dateHe}</b>\n\n`;
+  for(const s of sections){
+    txt+=`❌ <b>${s.label}</b>\n${s.detail}\n\n`;
+  }
+  return txt||'אין ספירות להיום';
+}
+
+function buildTgReminder(){
+  const sections=getTodaySections();
+  const state=loadRikuzState();
+  const pending=sections.filter(s=>!state[s.id]);
+  if(!pending.length) return null;
+  let txt='⏰ <b>תזכורת — ספירות שטרם בוצעו:</b>\n\n';
+  txt+=pending.map(s=>`❌ ${s.label}: ${s.detail}`).join('\n');
+  return txt;
+}
+
+function buildTgSummary(){
+  const sections=getTodaySections();
+  const state=loadRikuzState();
+  const ts=todayStr();
+  const [y,m,d]=ts.split('-');
+  const dateHe=Number(d)+' '+MON_F[Number(m)-1]+' '+y;
+  let txt=`📊 <b>סיכום ספירות 14:00 — ${dateHe}</b>\n\n`;
+  for(const s of sections){
+    txt+=(state[s.id]?'✅':'❌')+` <b>${s.label}</b>: ${s.detail}\n`;
+  }
+  return txt;
+}
 
 function ejsReady(){
   return typeof emailjs!=='undefined' && EJS_KEY!=='YOUR_PUBLIC_KEY';
@@ -1026,14 +1089,20 @@ function scheduleNotifications(){
   }
 }
 
-function fireNotif(type){
+async function fireNotif(type){
   const sections=getTodaySections();
   const state=loadRikuzState();
   const pending=sections.filter(s=>!state[s.id]);
   if(type==='reminder'){
     if(!pending.length)return;
-    const body='ממתין לביצוע:\n'+pending.map(s=>'⬜ '+s.label).join('\n');
-    new Notification('⏰ תזכורת — ספירות שטרם בוצעו',{body});
+    // browser notification
+    if(Notification.permission==='granted'){
+      const body=pending.map(s=>'⬜ '+s.label).join('\n');
+      new Notification('⏰ תזכורת — ספירות שטרם בוצעו',{body});
+    }
+    // Telegram reminder
+    const tgTxt=buildTgReminder();
+    if(tgTxt) await sendTelegram(tgTxt);
   }
 }
 
