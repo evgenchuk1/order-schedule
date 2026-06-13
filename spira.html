@@ -851,12 +851,13 @@ function buildEmailContent(isSummary){
 
   let subject, body;
   if(!isSummary){
-    subject=`📋 ריכוז ספירות בוקר — ${dateHe}`;
-    body=`שלום,\n\nריכוז ספירות מתוכנן ל-${dateHe}:\n\n`;
+    subject=`📋 ריכוז ספירות — ${dateHe}`;
+    body=`שלום,\n\nריכוז ספירות ל-${dateHe}:\n\n`;
     for(const sec of sections){
-      body+='• '+sec.label+'\n  '+sec.detail+'\n\n';
+      const done=state[sec.id];
+      body+=(done?'✅ בוצע':'❌ לא בוצע')+' — '+sec.label+'\n  '+sec.detail+'\n\n';
     }
-    body+='תאלצו להכניס V בתוכנה בסיום כל ספירה.\n\nלוז ספירות — שופרסל 208';
+    body+='לוז ספירות — שופרסל 208';
   } else {
     subject=`📊 סיכום ספירות 14:00 — ${dateHe}`;
     const done=sections.filter(s=>state[s.id]);
