@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="לוז ספירות">
 <meta name="theme-color" content="#1B4F72">
 <title>לוז ספירות — שופרסל 208</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;overflow:hidden;}
@@ -169,26 +170,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .mgmt-save-btn:active{background:#154360;}
 
 /* Rikuz */
-.rik-section{background:#fff;border-radius:16px;margin-bottom:12px;
+.rik-section{background:#fff;border-radius:16px;margin-bottom:14px;
              box-shadow:0 2px 8px rgba(0,0,0,.07);overflow:hidden;}
-.rik-sec-hdr{padding:11px 16px;font-size:16px;font-weight:800;color:#fff;}
-.rik-item{display:flex;align-items:flex-start;gap:14px;padding:14px 16px;
+.rik-sec-hdr{padding:16px 20px;font-size:24px;font-weight:800;color:#fff;}
+.rik-item{display:flex;align-items:flex-start;gap:18px;padding:20px 20px;
           border-top:1px solid #f0f0f0;cursor:pointer;transition:background .1s;}
 .rik-item:active{background:#F8FAFB;}
-.rik-cb{width:26px;height:26px;min-width:26px;border:2.5px solid #ccc;border-radius:7px;
+.rik-cb{width:39px;height:39px;min-width:39px;border:3px solid #ccc;border-radius:10px;
         display:flex;align-items:center;justify-content:center;transition:all .15s;
-        font-size:17px;color:transparent;margin-top:1px;}
+        font-size:25px;color:transparent;margin-top:2px;}
 .rik-cb.done{background:#27AE60;border-color:#27AE60;color:#fff;}
-.rik-item-text{flex:1;font-size:15px;line-height:1.5;}
+.rik-item-text{flex:1;font-size:23px;line-height:1.45;}
 .rik-item.done .rik-item-text{text-decoration:line-through;color:#aaa;}
-.rik-empty{text-align:center;padding:48px 20px;font-size:16px;color:#aaa;}
-.rik-date-bar{text-align:center;font-size:14px;color:#888;margin-bottom:14px;font-weight:600;}
+.rik-empty{text-align:center;padding:48px 20px;font-size:22px;color:#aaa;}
+.rik-date-bar{text-align:center;font-size:28px;color:#1B4F72;margin-bottom:18px;font-weight:800;}
 .rik-email-btn{width:100%;background:#EBF5FB;color:#1A5276;border:none;border-radius:14px;
-               padding:13px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;
+               padding:16px;font-size:20px;font-weight:700;cursor:pointer;font-family:inherit;
                margin-top:4px;margin-bottom:8px;}
 .rik-email-btn:active{background:#D4E9F7;}
 .rik-notif-btn{width:100%;background:#E8F8F5;color:#0A7A6E;border:none;border-radius:14px;
-               padding:13px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;
+               padding:16px;font-size:20px;font-weight:700;cursor:pointer;font-family:inherit;
                margin-bottom:12px;}
 
 /* Copyright modal */
@@ -341,7 +342,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="cp-title">זכויות יוצרים</div>
     <div class="cp-text">
       כל הזכויות שמורות ליבגני ציפיס © 2026<br><br>
-      יישום זה פותח ועוצב על ידי יבגני ציפיס לצורך ניהול לוחות ספירות בסניף שופרסל 208 — דיל נחל אורה.<br><br>
+      יישום זה פותח ועוצב על ידי יבגני ציפיס לצורך ניהול לוחות ספירות בסניפי שופרסל 208 — דיל נחל אורה ושופרסל 118.<br><br>
       חל איסור על העתקה, הפצה או שימוש מסחרי בכל חלק מהיישום ללא אישור בכתב מהמחבר.<br><br>
       כל הסימנים המסחריים הם רכושם של בעליהם בהתאמה.
     </div>
@@ -894,46 +895,89 @@ function schedule14Email(){
   const fire=new Date(now.getFullYear(),now.getMonth(),now.getDate(),14,0,0,0);
   const delay=fire-now;
   if(delay<=0) return;
-  setTimeout(()=>{
+  setTimeout(async()=>{
     const sections=getTodaySections();
     const state=loadRikuzState();
     const done=sections.filter(s=>state[s.id]);
-    if(!done.length) return; // nothing counted — don't send
-    if(confirm('שעה 14:00 — האם לשלוח סיכום ספירות בדואל?\n'+
-               done.map(s=>'✅ '+s.label).join('\n'))){
+    if(!done.length) return;
+    const emails=getMgmtEmails();
+    if(!emails.length) return;
+    const {subject,body}=buildEmailContent(true);
+    if(ejsReady()){
+      await sendViaEmailJS(emails,subject,body);
+    } else {
       openMailto(true);
     }
   }, delay);
 }
 
-function sendMorningEmailIfNeeded(){
+// ════ AUTOMATIC 06:30 MORNING EMAIL ════
+function scheduleMorningEmail(){
   const key='spira_morning_sent_'+todayStr();
   if(localStorage.getItem(key)) return;
-  const sections=getTodaySections();
-  if(!sections.length) return;
-  const emails=getMgmtEmails();
-  if(!emails.length) return;
-  // small delay so page finishes loading
-  setTimeout(()=>{
-    if(confirm('שלח מייל בוקר עם ריכוז ספירות לצוות הנהלה?\n'+
-               sections.map(s=>'• '+s.label+': '+s.detail).join('\n'))){
-      openMailto(false);
+
+  const now=new Date();
+  const fire=new Date(now.getFullYear(),now.getMonth(),now.getDate(),6,30,0,0);
+  const delay=fire-now;
+
+  const doSend=async()=>{
+    if(localStorage.getItem(key)) return; // already sent (race guard)
+    const sections=getTodaySections();
+    if(!sections.length) return;
+    const emails=getMgmtEmails();
+    if(!emails.length) return;
+    const {subject,body}=buildEmailContent(false);
+    let sent=false;
+    if(ejsReady()){
+      sent=await sendViaEmailJS(emails,subject,body);
+    } else {
+      // fallback: open mail client automatically (works on mobile PWA)
+      window.location.href='mailto:'+emails.join(',')+
+        '?subject='+encodeURIComponent(subject)+
+        '&body='+encodeURIComponent(body);
+      sent=true;
     }
-  }, 800);
+    if(sent) localStorage.setItem(key,'1');
+  };
+
+  if(delay<=0){
+    // already past 06:30 today — send now if not sent yet
+    doSend();
+  } else {
+    setTimeout(doSend, delay);
+  }
+}
+
+// ═══ EMAILJS CONFIG — заполните после регистрации на emailjs.com ═══
+const EJS_KEY = 'YOUR_PUBLIC_KEY';
+const EJS_SVC = 'YOUR_SERVICE_ID';
+const EJS_TPL = 'YOUR_TEMPLATE_ID';
+
+function ejsReady(){
+  return typeof emailjs!=='undefined' && EJS_KEY!=='YOUR_PUBLIC_KEY';
+}
+
+async function sendViaEmailJS(emails, subject, body){
+  if(!emails.length) return false;
+  try{
+    await emailjs.send(EJS_SVC, EJS_TPL,
+      {to_email: emails.join(','), subject, message: body},
+      EJS_KEY);
+    return true;
+  }catch(e){
+    console.error('EmailJS error:',e);
+    return false;
+  }
 }
 
 // ═══ NOTIFICATIONS ═══
 function requestAndScheduleNotif(){
-  if(!('Notification' in window)){
-    alert('הדפדפן אינו תומך בהתראות');return;
-  }
+  if(!('Notification' in window)){alert('הדפדפן אינו תומך בהתראות');return;}
   Notification.requestPermission().then(perm=>{
     if(perm==='granted'){
       scheduleNotifications();
-      alert('✅ התזכורות הופעלו!\nתקבלו התראה ב-06:30, כל שעה עד 13:30, וסיכום ב-14:00');
-    } else {
-      alert('לא ניתן אישור להתראות');
-    }
+      alert('✅ התזכורות הופעלו!\nתזכורת כל שעה 07:30–13:30, סיכום ב-14:00');
+    } else alert('לא ניתן אישור להתראות');
   });
 }
 
@@ -941,22 +985,14 @@ function scheduleNotifications(){
   if(Notification.permission!=='granted')return;
   const now=new Date();
   const base=new Date(now.getFullYear(),now.getMonth(),now.getDate());
-
   const times=[
-    {h:6, m:30, type:'morning'},
-    {h:7, m:30, type:'reminder'},
-    {h:8, m:30, type:'reminder'},
-    {h:9, m:30, type:'reminder'},
-    {h:10,m:30, type:'reminder'},
-    {h:11,m:30, type:'reminder'},
-    {h:12,m:30, type:'reminder'},
-    {h:13,m:30, type:'reminder'},
-    {h:14,m:0,  type:'summary'},
+    {h:7,m:30,type:'reminder'},{h:8,m:30,type:'reminder'},
+    {h:9,m:30,type:'reminder'},{h:10,m:30,type:'reminder'},
+    {h:11,m:30,type:'reminder'},{h:12,m:30,type:'reminder'},
+    {h:13,m:30,type:'reminder'},
   ];
-
   for(const t of times){
-    const fire=new Date(base);
-    fire.setHours(t.h,t.m,0,0);
+    const fire=new Date(base);fire.setHours(t.h,t.m,0,0);
     const delay=fire-now;
     if(delay>0) setTimeout(()=>fireNotif(t.type),delay);
   }
@@ -966,31 +1002,22 @@ function fireNotif(type){
   const sections=getTodaySections();
   const state=loadRikuzState();
   const pending=sections.filter(s=>!state[s.id]);
-  const done=sections.filter(s=>state[s.id]);
-
-  if(type==='morning'){
-    const body=sections.length
-      ?sections.map(s=>'• '+s.label+': '+s.detail).join('\n')
-      :'אין ספירות מתוכננות להיום';
-    new Notification('📋 לוז ספירות — ריכוז יומי',{body,icon:'/favicon.ico'});
-  } else if(type==='reminder'){
+  if(type==='reminder'){
     if(!pending.length)return;
     const body='ממתין לביצוע:\n'+pending.map(s=>'⬜ '+s.label).join('\n');
-    new Notification('⏰ תזכורת — ספירות שטרם בוצעו',{body,icon:'/favicon.ico'});
-  } else if(type==='summary'){
-    const body=sections.map(s=>(state[s.id]?'✅':'❌')+' '+s.label).join('\n')||'אין ספירות';
-    new Notification('📊 סיכום ספירות — 14:00',{body,icon:'/favicon.ico'});
+    new Notification('⏰ תזכורת — ספירות שטרם בוצעו',{body});
   }
 }
 
 // ═══ INIT ═══
+if(ejsReady()) emailjs.init(EJS_KEY);
 renderHome();
 renderChor();
 renderPachat();
 renderYomi();
 if(Notification.permission==='granted') scheduleNotifications();
 schedule14Email();
-sendMorningEmailIfNeeded();
+scheduleMorningEmail();
 </script>
 </body>
 </html>
