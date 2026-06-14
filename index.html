@@ -218,9 +218,28 @@
     .copyright{
       text-align:center;font-size:11px;color:var(--muted);
       padding:6px 16px;background:#fff;border-top:1px solid #F5D0D8;
-      flex-shrink:0;
+      flex-shrink:0;cursor:pointer;user-select:none;
     }
-    .copyright a{color:var(--primary);text-decoration:none;}
+    .copyright:active{opacity:.7;}
+    /* Copyright modal */
+    .cp-overlay{
+      display:none;position:fixed;inset:0;
+      background:rgba(0,0,0,.68);z-index:2000;
+      align-items:center;justify-content:center;padding:20px;
+    }
+    .cp-overlay.on{display:flex;}
+    .cp-modal{
+      background:#fff;border-radius:20px;padding:24px 20px 20px;
+      max-width:340px;width:100%;text-align:center;
+      animation:popIn .22s ease;
+    }
+    .cp-logo{width:60px;height:60px;border-radius:14px;object-fit:cover;margin-bottom:10px;box-shadow:0 2px 10px rgba(180,0,40,.25);}
+    .cp-title{font-size:17px;font-weight:800;color:var(--primary);margin-bottom:12px;}
+    .cp-text{font-size:13px;color:#555;line-height:1.7;text-align:right;}
+    .cp-close{
+      width:100%;margin-top:16px;padding:13px;border:none;border-radius:13px;
+      background:var(--primary-grad);color:#fff;font-size:16px;font-weight:700;cursor:pointer;
+    }
 
     /* ─── Warehouse FAB ─── */
     .fab-wh{
@@ -320,7 +339,22 @@
   <div class="container" id="container"></div>
 </div>
 
-<div class="copyright">© 2026 <a href="https://www.shufersal.co.il" target="_blank">שופרסל בע"מ</a> · סניף 208 דיל נחל אורה</div>
+<div class="copyright" onclick="document.getElementById('cpOverlay').classList.add('on')">© יבגני ציפיס 2026 — כל הזכויות שמורות</div>
+
+<!-- Copyright modal -->
+<div class="cp-overlay" id="cpOverlay" onclick="document.getElementById('cpOverlay').classList.remove('on')">
+  <div class="cp-modal" onclick="event.stopPropagation()">
+    <img class="cp-logo" src="logo.jpg" alt="שופרסל">
+    <div class="cp-title">זכויות יוצרים</div>
+    <div class="cp-text">
+      © כל הזכויות שמורות ליבגני ציפיס 2026<br><br>
+      יישום זה פותח ועוצב על ידי יבגני ציפיס לצורך ניהול לוז הזמנות סחורה בסניף 208 — דיל נחל אורה.<br><br>
+      חל איסור על העתקה, הפצה או שימוש מסחרי בכל חלק מהיישום ללא אישור בכתב מהמחבר.<br><br>
+      כל הסימנים המסחריים הם רכושם של בעליהם בהתאמה.
+    </div>
+    <button class="cp-close" onclick="document.getElementById('cpOverlay').classList.remove('on')">סגור ✕</button>
+  </div>
+</div>
 
 <!-- Alarm modal -->
 <div class="overlay" id="overlay">
