@@ -70,8 +70,10 @@ def send_telegram(text):
         with urllib.request.urlopen(req, timeout=10) as resp:
             r = json.loads(resp.read())
             print(f'Telegram: ok={r.get("ok")}  msg_id={r.get("result",{}).get("message_id")}')
+            return True
     except Exception as e:
         print(f'Telegram error: {e}')
+        return False
 
 # ─── Schedule (must match index.html SCH exactly) ───────────────────────────
 SCH = {
@@ -117,15 +119,8 @@ SCH = {
         {'nm': 'קוקה קולה',             'dl': '18:00', 'ic': '🥤', 'nt': ''},
     ],
     5: [],
-    6: [  # Saturday — TEST ONLY, remove after testing
-        {'nm': 'פרארי',   'dl': '23:00', 'ic': '🏎️', 'nt': 'טסט'},
-        {'nm': 'מזראטי',  'dl': '00:00', 'ic': '🏎️', 'nt': 'טסט'},
-    ],
+    6: [],
 }
-
-# ─── One-time test order: Ferrari today only ─────────────────────────────────
-if today_str == '2026-06-11':
-    SCH[4].insert(0, {'nm': 'פרארי — טסט חד פעמי', 'dl': '11:00', 'ic': '🏎️', 'nt': 'הזמנת בדיקה'})
 
 # ─── Timing config ───────────────────────────────────────────────────────────
 REMIND_AT  = [40, 35, 30, 25, 20, 15, 10, 5, 0]   # minutes before deadline
@@ -141,12 +136,59 @@ def in_window(cur, target):
     """True if cur is in [target, target+WINDOW)"""
     return 0 <= cur - target < WINDOW
 
-# ─── Find due reminders ───────────────────────────────────────────────────────
 orders = SCH.get(dow, [])
+
+# ─── Morning summary (06:30) ─────────────────────────────────────────────────
+MORNING_MIN = 6 * 60 + 30   # 06:30
+if orders and in_window(cur_min, MORNING_MIN):
+    key = f'morning|{today_str}'
+    if key not in today_fired:
+        today_fired[key] = now_il.strftime('%H:%M')
+        day_names = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
+        lines = [f'<b>☀️ בוקר טוב! לוז ספירות ליום {day_names[dow]} — {now_il.strftime("%d/%m/%Y")}</b>', '']
+        for item in orders:
+            line = f"{item['ic']} <b>{item['nm']}</b>  ·  עד {item['dl']}"
+            if item['nt']:
+                line += f"  ·  {item['nt']}"
+            lines.append(line)
+        lines.append('')
+        lines.append(f'סה"כ {len(orders)} ספירות היום')
+        print(f'--- Morning summary ---')
+        send_telegram('\n'.join(lines))
+
+# ─── Hourly reminders (07:30, 08:30 … 13:30) ────────────────────────────────
+HOURLY_HOURS = [7, 8, 9, 10, 11, 12, 13]
+if orders:
+    for h in HOURLY_HOURS:
+        target_min = h * 60 + 30
+        if in_window(cur_min, target_min):
+            key = f'hourly|{h}|{today_str}'
+            if key not in today_fired:
+                today_fired[key] = now_il.strftime('%H:%M')
+                # Show only orders whose deadline hasn't passed yet
+                upcoming = [it for it in orders if dl_to_min(it['dl']) > cur_min]
+                passed   = [it for it in orders if dl_to_min(it['dl']) <= cur_min]
+                lines = [f'<b>⏰ תזכורת שעתית — {now_il.strftime("%H:%M")}</b>', '']
+                if upcoming:
+                    lines.append('<b>📋 ממתין לביצוע:</b>')
+                    for it in upcoming:
+                        diff = dl_to_min(it['dl']) - cur_min
+                        lines.append(f"  {it['ic']} {it['nm']}  ·  עד {it['dl']}  ({diff} דק׳)")
+                if passed:
+                    lines.append('')
+                    lines.append('<b>✅ עבר המועד (אמור להיות בוצע):</b>')
+                    for it in passed:
+                        lines.append(f"  {it['ic']} {it['nm']}  ·  היה עד {it['dl']}")
+                print(f'--- Hourly reminder {h}:30 ---')
+                send_telegram('\n'.join(lines))
+
+# ─── Early exit if no orders today ───────────────────────────────────────────
 if not orders:
+    save_state({today_str: today_fired})
     print('No orders today. Exiting.')
     sys.exit(0)
 
+# ─── Find due proximity reminders ────────────────────────────────────────────
 groups = defaultdict(list)   # dl_str → [(item, is_overdue)]
 
 for item in orders:
