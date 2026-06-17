@@ -1,18 +1,13 @@
-name: ☀️ Morning summary + hourly reminders
+name: ☀️ Morning summary (orders)
 
 on:
   # Israel summer = UTC+3  (March-October)
   # Israel winter = UTC+2  (November-February)
-  # Jobs scheduled for IL summer (UTC+3); in winter they arrive 1h earlier — acceptable.
+  # Job scheduled for IL summer (UTC+3); in winter it arrives 1h earlier — acceptable.
+  # Cloud-only backup for the 06:30 morning summary in case the PC is off —
+  # 15-min-precision proximity reminders need Task Scheduler, see notify.py.
   schedule:
-    - cron: '28 3 * * 0,1,2,3,4'   # 06:28 IL → morning summary
-    - cron: '28 4 * * 0,1,2,3,4'   # 07:28 IL → hourly reminder
-    - cron: '28 5 * * 0,1,2,3,4'   # 08:28 IL
-    - cron: '28 6 * * 0,1,2,3,4'   # 09:28 IL
-    - cron: '28 7 * * 0,1,2,3,4'   # 10:28 IL
-    - cron: '28 8 * * 0,1,2,3,4'   # 11:28 IL
-    - cron: '28 9 * * 0,1,2,3,4'   # 12:28 IL
-    - cron: '28 10 * * 0,1,2,3,4'  # 13:28 IL
+    - cron: '28 3 * * 0,1,2,3,4,5'   # 06:28 IL → morning summary (Sun-Fri; Fri has 1 order)
   workflow_dispatch: {}   # allow manual trigger for testing
 
 jobs:

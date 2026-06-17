@@ -1,13 +1,15 @@
 """
 Runs on GitHub Actions (cloud). No state file — deduplication is handled
 by the cron schedule itself (one job per time slot).
-Sends:
-  - Morning summary at ~06:30 IL time
-  - Hourly reminder at ~07:30-13:30 IL time
-No proximity reminders (those need 5-min precision → Task Scheduler on PC).
+Sends only the 06:30 morning summary (Telegram personal + Email) — the
+15-min-precision proximity reminders need Task Scheduler on PC, see notify.py.
 """
-import json, sys, urllib.request
+import sys
 from datetime import datetime, timezone, timedelta
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import common
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -17,27 +19,10 @@ _utc = datetime.now(timezone.utc)
 IL_OFFSET = 3 if 3 <= _utc.month <= 10 else 2
 now_il  = _utc + timedelta(hours=IL_OFFSET)
 dow     = (now_il.weekday() + 1) % 7   # Sun=0 … Sat=6
-cur_min = now_il.hour * 60 + now_il.minute
 print(f'Israel time: {now_il.strftime("%A %Y-%m-%d %H:%M")}  dow={dow}  UTC+{IL_OFFSET}')
 
-# ─── Telegram ────────────────────────────────────────────────────────────────
-TELEGRAM_TOKEN   = '8445627382:AAHtPl2bAWhkyiqdy29PgsoCBgGxyn8HWiI'
-TELEGRAM_CHAT_ID = '8290509506'
-
-def send_telegram(text):
-    url  = f'https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage'
-    data = json.dumps({'chat_id': TELEGRAM_CHAT_ID, 'text': text,
-                       'parse_mode': 'HTML'},
-                      ensure_ascii=False).encode('utf-8')
-    req  = urllib.request.Request(url, data=data,
-                                  headers={'Content-Type': 'application/json; charset=utf-8'})
-    try:
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            r = json.loads(resp.read())
-            print(f'Telegram ok, msg_id={r.get("result",{}).get("message_id")}')
-    except Exception as e:
-        print(f'Telegram error: {e}')
-        sys.exit(1)
+BRANCH = '208'
+managers = common.get_managers(BRANCH)
 
 # ─── Schedule ─────────────────────────────────────────────────────────────────
 SCH = {
@@ -98,55 +83,25 @@ SCH = {
     6: [],
 }
 
-def dl_to_min(s):
-    h, m = map(int, s.split(':'))
-    return h * 60 + m
-
 orders = SCH.get(dow, [])
 if not orders:
     print('No orders today (Friday/Saturday or empty day). Exiting.')
     sys.exit(0)
 
-# ─── Decide what to send based on current IL time ────────────────────────────
-MORNING_MIN = 6 * 60 + 30   # 06:30
-HOURLY_MINS = [h * 60 + 30 for h in range(7, 14)]  # 07:30 … 13:30
+day_names = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
+tg_lines = [f'<b>☀️ בוקר טוב! לוז הזמנות ליום {day_names[dow]} — {now_il.strftime("%d/%m/%Y")}</b>',
+            '<i>📡 GitHub Cloud</i>', '']
+html_lines = [f'<h3>☀️ בוקר טוב! לוז הזמנות ליום {day_names[dow]} — {now_il.strftime("%d/%m/%Y")}</h3>']
+for item in orders:
+    line = f"{item['ic']} <b>{item['nm']}</b>  ·  עד {item['dl']}"
+    if item['nt']:
+        line += f"  ·  {item['nt']}"
+    tg_lines.append(line)
+    html_lines.append(f'<p>{line}</p>')
+tg_lines += ['', f'סה"כ {len(orders)} הזמנות היום']
+html_lines.append(f'<p>סה"כ {len(orders)} הזמנות היום</p>')
 
-# Morning summary: job is scheduled at 06:30 IL, just send it
-if cur_min < 7 * 60:
-    day_names = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
-    lines = [
-        f'<b>☀️ בוקר טוב! לוז ספירות ליום {day_names[dow]} — {now_il.strftime("%d/%m/%Y")}</b>',
-        f'<i>📡 GitHub Cloud • {now_il.strftime("%H:%M")}</i>',
-        '',
-    ]
-    for item in orders:
-        line = f"{item['ic']} <b>{item['nm']}</b>  ·  עד {item['dl']}"
-        if item['nt']:
-            line += f"  ·  {item['nt']}"
-        lines.append(line)
-    lines += ['', f'סה"כ {len(orders)} ספירות היום']
-    print('Sending morning summary...')
-    send_telegram('\n'.join(lines))
-
-# Hourly reminder: job scheduled at H:30, send reminder of remaining orders
-else:
-    upcoming = [it for it in orders if dl_to_min(it['dl']) > cur_min]
-    passed   = [it for it in orders if dl_to_min(it['dl']) <= cur_min]
-    lines = [
-        f'<b>⏰ תזכורת שעתית — {now_il.strftime("%H:%M")}</b>',
-        f'<i>📡 GitHub Cloud</i>',
-        '',
-    ]
-    if upcoming:
-        lines.append('<b>📋 ממתין לביצוע:</b>')
-        for it in upcoming:
-            diff = dl_to_min(it['dl']) - cur_min
-            lines.append(f"  {it['ic']} {it['nm']}  ·  עד {it['dl']}  ({diff} דק׳)")
-    if passed:
-        lines += ['', '<b>✅ אמור להיות בוצע:</b>']
-        for it in passed:
-            lines.append(f"  {it['ic']} {it['nm']}  ·  היה עד {it['dl']}")
-    if not upcoming and not passed:
-        lines.append('אין ספירות היום')
-    print(f'Sending hourly reminder ({now_il.strftime("%H:%M")})...')
-    send_telegram('\n'.join(lines))
+print('Sending morning summary (cloud backup)...')
+common.send_telegram_to_managers(managers, '\n'.join(tg_lines))
+common.send_email_to_managers(managers, f'לוז הזמנות 208 — {day_names[dow]} {now_il.strftime("%d/%m/%Y")}',
+                               '\n'.join(html_lines))

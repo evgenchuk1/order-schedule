@@ -8,7 +8,6 @@
 <meta name="apple-mobile-web-app-title" content="לוז ספירות">
 <meta name="theme-color" content="#CC0030">
 <title>לוז ספירות — שופרסל 208</title>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;overflow:hidden;}
@@ -741,6 +740,10 @@ function renderHanhala(){
           <div class="mgmt-label">כתובת מייל</div>
           <input class="mgmt-input" id="mn_email_${k}" type="email" placeholder="name@example.com" value="${saved.email||''}">
         </div>
+        <div class="mgmt-field">
+          <div class="mgmt-label">Telegram Chat ID</div>
+          <input class="mgmt-input" id="mn_tg_${k}" type="text" placeholder="קבל מ-whoami_telegram.py" value="${saved.tgChatId||''}">
+        </div>
       </div>
     </div>`;
   }
@@ -756,16 +759,19 @@ function saveHanhala(){
       name:(document.getElementById('mn_name_'+k)||{}).value||'',
       phone:(document.getElementById('mn_phone_'+k)||{}).value||'',
       email:(document.getElementById('mn_email_'+k)||{}).value||'',
+      tgChatId:(document.getElementById('mn_tg_'+k)||{}).value||'',
     };
   }
   localStorage.setItem(hanhalaKey(),JSON.stringify(data));
   const btn=document.querySelector('.mgmt-save-btn');
   if(btn){btn.textContent='✅ נשמר!';setTimeout(()=>btn.textContent='שמור הנהלה ✓',2000);}
+  saveHanhalaToFirestore(data);
 }
 
 function openHanhala(){
   renderHanhala();
   document.getElementById('ovHanhala').classList.add('active');
+  pullHanhalaFromFirestore();
 }
 
 // ═══ ריכוז יומי ═══
@@ -822,6 +828,7 @@ function toggleRikuz(id){
   saveRikuzState(s);
   renderRikuz();
   renderRikuzHomeCard();
+  saveDailyStateToFirestore(s);
 }
 
 function renderRikuz(){
@@ -847,9 +854,6 @@ function renderRikuz(){
     }
   }
 
-  h+=`<button id="forceSendBtn" class="rik-email-btn" onclick="forceSendNow()" style="background:linear-gradient(135deg,#E8003A,#AA0020);color:#fff;font-size:22px;padding:18px;">📧 שלח עכשיו — מייל + טלגרם</button>`;
-  h+=`<button id="tgTestBtn" class="rik-notif-btn" onclick="testTelegram()" style="background:#229ED9;color:#fff;font-size:20px;padding:16px;">✈️ בדוק טלגרם עכשיו</button>`;
-  h+=`<button class="rik-notif-btn" onclick="requestAndScheduleNotif()">🔔 הפעל תזכורות יומיות</button>`;
   document.getElementById('rikuzBody').innerHTML=h;
 }
 
@@ -875,6 +879,7 @@ function renderRikuzHomeCard(){
 function openRikuz(){
   renderRikuz();
   document.getElementById('ovRikuz').classList.add('active');
+  pullDailyStateFromFirestore();
 }
 
 // ═══ EMAIL ═══
@@ -886,273 +891,102 @@ function getMgmtEmails(){
     .filter(Boolean);
 }
 
-function buildEmailContent(isSummary){
+function buildEmailContent(){
   const sections=getTodaySections();
   const state=loadRikuzState();
   const ts=todayStr();
   const [y,m,d]=ts.split('-');
   const dateHe=Number(d)+' '+MON_F[Number(m)-1]+' '+y;
 
-  let subject, body;
-  if(!isSummary){
-    subject=`📋 ריכוז ספירות — ${dateHe}`;
-    body=`שלום,\n\nריכוז ספירות ל-${dateHe}:\n\n`;
-    for(const sec of sections){
-      const done=state[sec.id];
-      body+=(done?'✅ בוצע':'❌ לא בוצע')+' — '+sec.label+'\n  '+sec.detail+'\n\n';
-    }
-    body+='לוז ספירות — שופרסל 208';
-  } else {
-    subject=`📊 סיכום ספירות 14:00 — ${dateHe}`;
-    const done=sections.filter(s=>state[s.id]);
-    const pending=sections.filter(s=>!state[s.id]);
-    body=`שלום,\n\nסיכום ספירות ל-${dateHe} (נכון לשעה 14:00):\n\n`;
-    if(done.length){
-      body+='✅ בוצע:\n'+done.map(s=>'  • '+s.label+': '+s.detail).join('\n')+'\n\n';
-    }
-    if(pending.length){
-      body+='❌ לא בוצע:\n'+pending.map(s=>'  • '+s.label).join('\n')+'\n\n';
-    }
-    if(!done.length&&!pending.length) body+='אין ספירות לדיווח.\n\n';
-    body+='לוז ספירות — שופרסל 208';
+  const subject=`📋 ריכוז ספירות — ${dateHe}`;
+  let body=`שלום,\n\nריכוז ספירות ל-${dateHe}:\n\n`;
+  for(const sec of sections){
+    const done=state[sec.id];
+    body+=(done?'✅ בוצע':'❌ לא בוצע')+' — '+sec.label+'\n  '+sec.detail+'\n\n';
   }
+  body+='לוז ספירות — שופרסל 208';
   return {subject, body};
 }
 
-function openMailto(isSummary){
+function openMailto(){
   const emails=getMgmtEmails();
   if(!emails.length){
     alert('לא הוגדרו כתובות מייל בטבלת הנהלת הסניף.\nאנא הזן כתובות מייל ונסה שוב.');
     return;
   }
-  // mark morning sent
-  if(!isSummary) localStorage.setItem('spira_morning_sent_'+todayStr(),'1');
-
-  const {subject,body}=buildEmailContent(isSummary);
+  const {subject,body}=buildEmailContent();
   window.location.href='mailto:'+emails.join(',')+
     '?subject='+encodeURIComponent(subject)+
     '&body='+encodeURIComponent(body);
 }
 
-function sendRikuzEmail(){openMailto(false);}
+function sendRikuzEmail(){openMailto();}
 
-function schedule14Email(){
-  const now=new Date();
-  const fire=new Date(now.getFullYear(),now.getMonth(),now.getDate(),14,0,0,0);
-  const delay=fire-now;
-  if(delay<=0) return;
-  setTimeout(async()=>{
-    const sections=getTodaySections();
-    const state=loadRikuzState();
-    const done=sections.filter(s=>state[s.id]);
-    if(!done.length) return;
-    // email
-    const emails=getMgmtEmails();
-    if(emails.length){
-      const {subject,body}=buildEmailContent(true);
-      if(ejsReady()) await sendViaEmailJS(emails,subject,body);
-      else openMailto(true);
-    }
-    // Telegram
-    await sendTelegram(buildTgSummary());
-  }, delay);
-}
+// ═══ FIRESTORE (project expiry-tracker-ebf92 — shared with Expiry/Ticket Tracker) ═══
+const firebaseConfig = {
+  apiKey:            "AIzaSyCRBmBDYpcERv_tbwd0E7GEskm-_xHYBhk",
+  authDomain:        "expiry-tracker-ebf92.firebaseapp.com",
+  projectId:         "expiry-tracker-ebf92",
+  storageBucket:     "expiry-tracker-ebf92.firebasestorage.app",
+  messagingSenderId: "617575327249",
+  appId:             "1:617575327249:web:75f84278678ad237bef3b0"
+};
+let fsDb=null, fsDoc=null, fsGetDoc=null, fsSetDoc=null;
 
-// ════ AUTOMATIC 06:30 MORNING EMAIL ════
-function scheduleMorningEmail(){
-  const key='spira_v2_morning_'+currentBranch+'_'+todayStr();
-  if(localStorage.getItem(key)) return;
-
-  const now=new Date();
-  const fire=new Date(now.getFullYear(),now.getMonth(),now.getDate(),6,30,0,0);
-  const delay=fire-now;
-
-  const doSend=async()=>{
-    if(localStorage.getItem(key)) return; // already sent (race guard)
-    const sections=getTodaySections();
-    if(!sections.length) return;
-    const emails=getMgmtEmails();
-    if(!emails.length) return;
-    const {subject,body}=buildEmailContent(false);
-    let sent=false;
-    if(ejsReady()){
-      sent=await sendViaEmailJS(emails,subject,body);
-    } else {
-      // fallback: open mail client automatically (works on mobile PWA)
-      window.location.href='mailto:'+emails.join(',')+
-        '?subject='+encodeURIComponent(subject)+
-        '&body='+encodeURIComponent(body);
-      sent=true;
-    }
-    if(sent) localStorage.setItem(key,'1');
-  // Telegram morning message
-  await sendTelegram(buildTgMorning());
-  };
-
-  if(delay<=0){
-    doSend();
-  } else {
-    setTimeout(doSend, delay);
-  }
-}
-
-// כפתור שליחה ידנית — מנקה גם את הגנת השליחה היומית
-async function testTelegram(){
-  const btn=document.getElementById('tgTestBtn');
-  if(btn){btn.textContent='⏳ שולח...';btn.disabled=true;}
-  const ok=await sendTelegram(buildTgMorning());
-  if(btn){btn.textContent=ok?'✅ נשלח בטלגרם!':'❌ שגיאה';btn.disabled=false;}
-}
-
-async function forceSendNow(){
-  const key='spira_v2_morning_'+currentBranch+'_'+todayStr();
-  localStorage.removeItem(key);
-  const emails=getMgmtEmails();
-  if(!emails.length){
-    alert('לא נמצאו כתובות מייל בטבלת הנהלת הסניף.\nאנא הזן כתובות ושמור.');
-    return;
-  }
-  const {subject,body}=buildEmailContent(false);
-  const btn=document.getElementById('forceSendBtn');
-  if(btn){btn.textContent='⏳ שולח...';btn.disabled=true;}
-  let ok=false;
-  if(ejsReady()){
-    ok=await sendViaEmailJS(emails,subject,body);
-  } else {
-    window.location.href='mailto:'+emails.join(',')+
-      '?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
-    ok=true;
-  }
-  if(btn){
-    btn.textContent=ok?'✅ נשלח!':'❌ שגיאה';
-    btn.disabled=false;
-  }
-  if(ok) localStorage.setItem(key,'1');
-  // also Telegram
-  await sendTelegram(buildTgMorning());
-}
-
-// ═══ EMAILJS CONFIG ═══
-const EJS_KEY = 'i5xgb_9LOOvXR4YQq';
-const EJS_SVC = 'service_069inzf';
-const EJS_TPL = 'template_yyn53ke';
-
-// ═══ TELEGRAM CONFIG ═══
-const TG_TOKEN = '8803274567:AAHDgxwQwdJfTQdS49Vdof7C8RuWwDJk8p4';
-const TG_CHAT  = '-5283244241';
-
-async function sendTelegram(text){
-  if(!TG_TOKEN||!TG_CHAT) return false;
+async function initFirestore(){
   try{
-    const r=await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({chat_id:TG_CHAT,text,parse_mode:'HTML'})
-    });
-    return r.ok;
-  }catch(e){console.error('TG:',e);return false;}
+    const {initializeApp} = await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js');
+    const {getFirestore, doc, getDoc, setDoc} = await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js');
+    const app=initializeApp(firebaseConfig);
+    fsDb=getFirestore(app);
+    fsDoc=doc; fsGetDoc=getDoc; fsSetDoc=setDoc;
+  }catch(e){console.error('Firestore init error:',e);}
 }
 
-function buildTgMorning(){
-  const sections=getTodaySections();
-  const state=loadRikuzState();
-  const ts=todayStr();
-  const [y,m,d]=ts.split('-');
-  const dateHe=Number(d)+' '+MON_F[Number(m)-1]+' '+y;
-  let txt=`📋 <b>ריכוז ספירות — ${dateHe}</b>\n\n`;
-  for(const s of sections){
-    txt+=(state[s.id]?'✅':'❌')+` <b>${s.label}</b>\n${s.detail}\n\n`;
-  }
-  return txt||'אין ספירות להיום';
+async function saveHanhalaToFirestore(data){
+  if(!fsDb) await initFirestore();
+  if(!fsDb) return;
+  try{ await fsSetDoc(fsDoc(fsDb,'schedule_managers',String(currentBranch)),{roles:data}); }
+  catch(e){console.error('Firestore save hanhala error:',e);}
 }
 
-function buildTgReminder(){
-  const sections=getTodaySections();
-  const state=loadRikuzState();
-  const pending=sections.filter(s=>!state[s.id]);
-  if(!pending.length) return null;
-  let txt='⏰ <b>תזכורת — ספירות שטרם בוצעו:</b>\n\n';
-  txt+=pending.map(s=>`❌ ${s.label}: ${s.detail}`).join('\n');
-  return txt;
-}
-
-function buildTgSummary(){
-  const sections=getTodaySections();
-  const state=loadRikuzState();
-  const ts=todayStr();
-  const [y,m,d]=ts.split('-');
-  const dateHe=Number(d)+' '+MON_F[Number(m)-1]+' '+y;
-  let txt=`📊 <b>סיכום ספירות 14:00 — ${dateHe}</b>\n\n`;
-  for(const s of sections){
-    txt+=(state[s.id]?'✅':'❌')+` <b>${s.label}</b>: ${s.detail}\n`;
-  }
-  return txt;
-}
-
-function ejsReady(){
-  return typeof emailjs!=='undefined' && EJS_KEY!=='YOUR_PUBLIC_KEY';
-}
-
-async function sendViaEmailJS(emails, subject, body){
-  if(!emails.length) return false;
+async function pullHanhalaFromFirestore(){
+  if(!fsDb) await initFirestore();
+  if(!fsDb) return;
   try{
-    await emailjs.send(EJS_SVC, EJS_TPL,
-      {to_email: emails.join(','), subject, message: body},
-      EJS_KEY);
-    return true;
-  }catch(e){
-    console.error('EmailJS error:',e);
-    return false;
-  }
-}
-
-// ═══ NOTIFICATIONS ═══
-function requestAndScheduleNotif(){
-  if(!('Notification' in window)){alert('הדפדפן אינו תומך בהתראות');return;}
-  Notification.requestPermission().then(perm=>{
-    if(perm==='granted'){
-      scheduleNotifications();
-      alert('✅ התזכורות הופעלו!\nתזכורת כל שעה 07:30–13:30, סיכום ב-14:00');
-    } else alert('לא ניתן אישור להתראות');
-  });
-}
-
-function scheduleNotifications(){
-  if(Notification.permission!=='granted')return;
-  const now=new Date();
-  const base=new Date(now.getFullYear(),now.getMonth(),now.getDate());
-  const times=[
-    {h:7,m:30,type:'reminder'},{h:8,m:30,type:'reminder'},
-    {h:9,m:30,type:'reminder'},{h:10,m:30,type:'reminder'},
-    {h:11,m:30,type:'reminder'},{h:12,m:30,type:'reminder'},
-    {h:13,m:30,type:'reminder'},
-  ];
-  for(const t of times){
-    const fire=new Date(base);fire.setHours(t.h,t.m,0,0);
-    const delay=fire-now;
-    if(delay>0) setTimeout(()=>fireNotif(t.type),delay);
-  }
-}
-
-async function fireNotif(type){
-  const sections=getTodaySections();
-  const state=loadRikuzState();
-  const pending=sections.filter(s=>!state[s.id]);
-  if(type==='reminder'){
-    if(!pending.length)return;
-    // browser notification
-    if(Notification.permission==='granted'){
-      const body=pending.map(s=>'⬜ '+s.label).join('\n');
-      new Notification('⏰ תזכורת — ספירות שטרם בוצעו',{body});
+    const snap=await fsGetDoc(fsDoc(fsDb,'schedule_managers',String(currentBranch)));
+    if(snap.exists()){
+      const roles=snap.data().roles||{};
+      localStorage.setItem(hanhalaKey(),JSON.stringify(roles));
+      if(document.getElementById('ovHanhala').classList.contains('active')) renderHanhala();
     }
-    // Telegram reminder
-    const tgTxt=buildTgReminder();
-    if(tgTxt) await sendTelegram(tgTxt);
-  }
+  }catch(e){console.error('Firestore pull hanhala error:',e);}
+}
+
+async function saveDailyStateToFirestore(state){
+  if(!fsDb) await initFirestore();
+  if(!fsDb) return;
+  try{ await fsSetDoc(fsDoc(fsDb,'schedule_daily_state',currentBranch+'_'+todayStr()),state); }
+  catch(e){console.error('Firestore save daily state error:',e);}
+}
+
+async function pullDailyStateFromFirestore(){
+  if(!fsDb) await initFirestore();
+  if(!fsDb) return;
+  try{
+    const snap=await fsGetDoc(fsDoc(fsDb,'schedule_daily_state',currentBranch+'_'+todayStr()));
+    if(snap.exists()){
+      const remote=snap.data()||{};
+      const local=loadRikuzState();
+      const merged={...remote,...local}; // local toggles on this device win
+      saveRikuzState(merged);
+      renderRikuz();
+      renderRikuzHomeCard();
+    }
+  }catch(e){console.error('Firestore pull daily state error:',e);}
 }
 
 // ═══ INIT ═══
-if(ejsReady()) emailjs.init(EJS_KEY);
 // Restore branch UI state on load
 (function(){
   const b=currentBranch;
@@ -1165,9 +999,7 @@ renderHome();
 renderChor();
 renderPachat();
 renderYomi();
-if(Notification.permission==='granted') scheduleNotifications();
-schedule14Email();
-scheduleMorningEmail();
+initFirestore();
 </script>
 </body>
 </html>

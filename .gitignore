@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+*.log
+notify_state.json
+notify_spira_state.json

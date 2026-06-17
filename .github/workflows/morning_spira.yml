@@ -1,0 +1,23 @@
+name: 📋 Spira counting reminders
+
+on:
+  # Israel summer = UTC+3 (March-October); winter jobs arrive 1h earlier — acceptable.
+  # Cloud-only backup for when the PC is off — precise path is Task Scheduler
+  # running notify_spira.py every 5 min, see run_notify_spira.bat/.vbs.
+  schedule:
+    - cron: '30 3 * * *'   # 06:30 IL
+    - cron: '30 4 * * *'   # 07:30 IL
+    - cron: '30 5 * * *'   # 08:30 IL
+    - cron: '30 6 * * *'   # 09:30 IL
+    - cron: '30 7 * * *'   # 10:30 IL
+    - cron: '30 8 * * *'   # 11:30 IL
+    - cron: '30 9 * * *'   # 12:30 IL — last reminder
+  workflow_dispatch: {}
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run cloud spira notifier
+        run: python3 .github/scripts/notify_spira_cloud.py
