@@ -1,0 +1,16 @@
+{
+  "name": "לוז ספירות — שופרסל",
+  "short_name": "לוז ספירות",
+  "description": "לוח זמנים לספירות מלאי — סניפים 118 ו-208",
+  "start_url": "./spira.html",
+  "display": "standalone",
+  "background_color": "#E8F5E9",
+  "theme_color": "#00695C",
+  "orientation": "portrait",
+  "lang": "he",
+  "dir": "rtl",
+  "icons": [
+    { "src": "spira-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "spira-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
