@@ -642,7 +642,7 @@ function renderYomi(){
       h+=`<div class="tl-week-lbl">${y.w===1?'שבוע 1 — נדחה ⏸':'שבוע '+y.w}</div>`;
     }
     const cls=['tl-item',past?'is-past':'',today?'is-today':'',y.delay?'is-delayed':'',isNext?'is-next':''].filter(Boolean).join(' ');
-    const sundayExtra=(!y.delay&&y.dn==='א')?['עגלות לקוחות','מזון תינוקות']:[];
+    const sundayExtra=(!y.delay&&y.dn==='א')?['עגלות לקוחות','מזון תינוקות','ספירת כל הירקות','ספירת כל סוגי הבשר']:[];
     const allItems=[...y.items,...sundayExtra];
     h+=`<div class="${cls}">
       <div class="tl-left">
@@ -806,7 +806,7 @@ function getTodaySections(){
 
   const ty=YOMI.find(y=>y.d===ts&&y.items.length&&!y.delay);
   if(ty){
-    const sundayExtra=(ty.dn==='א')?['עגלות לקוחות','מזון תינוקות']:[];
+    const sundayExtra=(ty.dn==='א')?['עגלות לקוחות','מזון תינוקות','ספירת כל הירקות','ספירת כל סוגי הבשר']:[];
     sections.push({
       id:'yomi',
       label:'ספירה יומית',
