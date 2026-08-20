@@ -1,7 +1,7 @@
 // OneSignal push support — must be first
 importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
 
-const CACHE = 'order-v3';
+const CACHE = 'order-v4';
 const FILES = ['./index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
