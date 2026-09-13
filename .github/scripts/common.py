@@ -5,16 +5,16 @@ Shared helpers for all notify_*.py scripts:
   - Telegram send (personal chat per manager).
   - Gmail SMTP send (same pattern as trading/send_trading_daily.py).
 """
-import json, urllib.request, urllib.error, smtplib
+import json, os, sys, urllib.request, urllib.error, smtplib
 from email.mime.text import MIMEText
+
+sys.path.insert(0, os.path.dirname(__file__))
+from local_secrets import TELEGRAM_TOKEN, GMAIL_APP_PWD
 
 FIRESTORE_PROJECT = 'expiry-tracker-ebf92'
 FIRESTORE_BASE = f'https://firestore.googleapis.com/v1/projects/{FIRESTORE_PROJECT}/databases/(default)/documents'
 
-TELEGRAM_TOKEN = '8445627382:AAHtPl2bAWhkyiqdy29PgsoCBgGxyn8HWiI'
-
 GMAIL_FROM    = 'evgenchuk1@gmail.com'
-GMAIL_APP_PWD = 'rxhr cudb gwmm hsqw'
 
 MGMT_ROLES = ['מנהל', 'סגן מנהל 1', 'סגן מנהל 2', 'סגן מנהל 3', 'קלדן', 'מנהל זמינות']
 

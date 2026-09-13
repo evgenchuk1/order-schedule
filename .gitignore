@@ -3,3 +3,4 @@ __pycache__/
 *.log
 notify_state.json
 notify_spira_state.json
+.github/scripts/local_secrets.py
