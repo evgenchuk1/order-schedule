@@ -443,13 +443,14 @@ const PACHAT = [
   {d:"2026-08-03", w:13, items:["בשר קפוא חלקים"],               codes:["181"]},
   {d:"2026-08-10", w:14, items:["אביזרי תינוקות"],                codes:["452"]},
   {d:"2026-08-17", w:15, items:["אביזרי גילוח"],                  codes:["438"]},
-  {d:"2026-08-24", w:16, items:['סכו"ם'],                         codes:["831"]},
-  {d:"2026-08-31", w:17, items:["מאגדות גלידה"],                  codes:["203"]},
-  {d:"2026-09-07", w:18, items:["גלידות משפחתיות"],               codes:["202"]},
-  {d:"2026-09-14", w:19, items:["סטים מצעים"],                    codes:["913"]},
-  {d:"2026-09-21", w:20, items:["עיתונים ומגזינים"],              codes:["955"]},
-  {d:"2026-09-28", w:21, items:["איפור"],                          codes:["413","414"]},
-  {d:"2026-10-05", w:22, items:["קרמים"],                         codes:["427"]},
+  // שבוע 16-22 (1-7 בסבב) — בוטל, חגי תשרי (24/8–5/10/26)
+  {d:"2026-08-24", w:16, cancelled:true, items:['סכו"ם'],                         codes:["831"]},
+  {d:"2026-08-31", w:17, cancelled:true, items:["מאגדות גלידה"],                  codes:["203"]},
+  {d:"2026-09-07", w:18, cancelled:true, items:["גלידות משפחתיות"],               codes:["202"]},
+  {d:"2026-09-14", w:19, cancelled:true, items:["סטים מצעים"],                    codes:["913"]},
+  {d:"2026-09-21", w:20, cancelled:true, items:["עיתונים ומגזינים"],              codes:["955"]},
+  {d:"2026-09-28", w:21, cancelled:true, items:["איפור"],                          codes:["413","414"]},
+  {d:"2026-10-05", w:22, cancelled:true, items:["קרמים"],                         codes:["427"]},
   {d:"2026-10-12", w:23, items:["בישום"],                         codes:["400","401","402","403"]},
   {d:"2026-10-19", w:24, items:["אביזרי סלולר"],                  codes:["430"]},
   {d:"2026-10-26", w:25, items:["דגים קפואים"],                   codes:["112"]},
@@ -583,7 +584,7 @@ function renderHome(){
     cd?'יום '+cd.day+"' — "+cd.items.length+" פלנ'":'ראה לוח';
 
   const ts=todayStr();
-  const np=PACHAT.find(p=>p.d>=ts);
+  const np=PACHAT.find(p=>p.d>=ts&&!p.cancelled);
   if(np){
     const dif=diff(np.d);
     document.getElementById('pachatPill').textContent=
@@ -605,7 +606,7 @@ function renderHome(){
 
   const lines=[];
   if(cd) lines.push('📍 חור במדף היום: יום '+cd.day+"' — "+cd.items.slice(0,3).join(', ')+'...');
-  const todayP=PACHAT.find(p=>p.d===ts);
+  const todayP=PACHAT.find(p=>p.d===ts&&!p.cancelled);
   if(todayP) lines.push('📉 פחת היום: '+todayP.items.join(', ')+' ['+todayP.codes.join(',')+']');
   const todayY=YOMI.find(y=>y.d===ts&&!y.cancelled);
   if(todayY&&todayY.items.length) lines.push('📅 יומי היום: '+todayY.items.join(', '));
@@ -653,14 +654,14 @@ function renderChor(){
 // ═══ RENDER פחת ═══
 function renderPachat(){
   const ts=todayStr();
-  const nextEntry=PACHAT.find(p=>p.d>=ts);
+  const nextEntry=PACHAT.find(p=>p.d>=ts&&!p.cancelled);
   let h='';
   for(const p of PACHAT){
     const dd=parseD(p.d);
     const dif=diff(p.d);
     const past=p.d<ts, today=p.d===ts;
     const isNext=p===nextEntry;
-    const cls=['tl-item',past?'is-past':'',today?'is-today':'',isNext?'is-next':''].filter(Boolean).join(' ');
+    const cls=['tl-item',past?'is-past':'',today?'is-today':'',p.cancelled?'is-cancelled':'',isNext?'is-next':''].filter(Boolean).join(' ');
     h+=`<div class="${cls}">
       <div class="tl-left">
         <div class="tl-dd">${dd.getDate()}</div>
@@ -670,8 +671,9 @@ function renderPachat(){
       <div class="tl-right">
         <div class="tl-tags">
           ${p.codes.map(c=>`<span class="tl-code">${c}</span>`).join('')}
-          ${today?'<span class="tl-today-tag">📍 היום</span>':''}
-          ${!past&&!today&&dif===1?'<span class="tl-today-tag">מחר</span>':''}
+          ${p.cancelled?'<span class="tl-cancel-tag">🚫 בוטל</span>':''}
+          ${today&&!p.cancelled?'<span class="tl-today-tag">📍 היום</span>':''}
+          ${!past&&!today&&!p.cancelled&&dif===1?'<span class="tl-today-tag">מחר</span>':''}
         </div>
         <div class="tl-chips">
           ${p.items.map(i=>`<span class="tl-chip">${i}</span>`).join('')}
@@ -679,7 +681,7 @@ function renderPachat(){
       </div>
     </div>`;
   }
-  h+=`<div class="note-box">• דממת ספירות שבועות: 17/5–23/5/26</div>`;
+  h+=`<div class="note-box">• דממת ספירות שבועות: 17/5–23/5/26<br>• בוטל — חגי תשרי: 24/8–5/10/26 (שבועות 16–22)</div>`;
   document.getElementById('pachatBody').innerHTML=h;
 }
 

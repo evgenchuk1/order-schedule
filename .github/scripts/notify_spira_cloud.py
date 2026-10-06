@@ -47,6 +47,22 @@ PACHAT = [
     {'d': '2026-08-03', 'items': ['בשר קפוא חלקים'],      'codes': ['181']},
     {'d': '2026-08-10', 'items': ['אביזרי תינוקות'],      'codes': ['452']},
     {'d': '2026-08-17', 'items': ['אביזרי גילוח'],        'codes': ['438']},
+    # 24/8–5/10 — בוטל, חגי תשרי
+    {'d': '2026-08-24', 'items': ['סכו"ם'], 'codes': ['831'], 'cancelled': True},
+    {'d': '2026-08-31', 'items': ['מאגדות גלידה'], 'codes': ['203'], 'cancelled': True},
+    {'d': '2026-09-07', 'items': ['גלידות משפחתיות'], 'codes': ['202'], 'cancelled': True},
+    {'d': '2026-09-14', 'items': ['סטים מצעים'], 'codes': ['913'], 'cancelled': True},
+    {'d': '2026-09-21', 'items': ['עיתונים ומגזינים'], 'codes': ['955'], 'cancelled': True},
+    {'d': '2026-09-28', 'items': ['איפור'], 'codes': ['413', '414'], 'cancelled': True},
+    {'d': '2026-10-05', 'items': ['קרמים'], 'codes': ['427'], 'cancelled': True},
+    {'d': '2026-10-12', 'items': ['בישום'], 'codes': ['400', '401', '402', '403']},
+    {'d': '2026-10-19', 'items': ['אביזרי סלולר'], 'codes': ['430']},
+    {'d': '2026-10-26', 'items': ['דגים קפואים'], 'codes': ['112']},
+    {'d': '2026-11-02', 'items': ['מוצרי קו קופות'], 'codes': ['690']},
+    {'d': '2026-11-09', 'items': ['דג סלמון'], 'codes': ['114']},
+    {'d': '2026-11-16', 'items': ['בשר קפוא חלקים'], 'codes': ['181']},
+    {'d': '2026-11-23', 'items': ['אביזרי תינוקות'], 'codes': ['452']},
+    {'d': '2026-11-30', 'items': ['אביזרי גילוח'], 'codes': ['438']},
 ]
 
 YOMI = [
@@ -107,7 +123,7 @@ def get_today_sections(date_str, dow_):
     if cd:
         sections.append({'id': 'chor', 'label': 'חור במדף',
                           'detail': "יום " + cd['day'] + "' — " + ', '.join(cd['items'])})
-    tp = next((p for p in PACHAT if p['d'] == date_str), None)
+    tp = next((p for p in PACHAT if p['d'] == date_str and not p.get('cancelled')), None)
     if tp:
         sections.append({'id': 'pachat', 'label': 'פחת',
                           'detail': ', '.join(tp['items']) + ' [פלנ׳: ' + ', '.join(tp['codes']) + ']'})
