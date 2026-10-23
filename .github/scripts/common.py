@@ -9,7 +9,12 @@ import json, os, sys, urllib.request, urllib.error, smtplib
 from email.mime.text import MIMEText
 
 sys.path.insert(0, os.path.dirname(__file__))
-from local_secrets import TELEGRAM_TOKEN, GMAIL_APP_PWD
+try:
+    from local_secrets import TELEGRAM_TOKEN, GMAIL_APP_PWD
+except ImportError:
+    # GitHub Actions: local_secrets.py is gitignored, values come from repo secrets
+    TELEGRAM_TOKEN = os.environ.get('TELEGRAM_TOKEN', '')
+    GMAIL_APP_PWD = os.environ.get('GMAIL_APP_PWD', '')
 
 FIRESTORE_PROJECT = 'expiry-tracker-ebf92'
 FIRESTORE_BASE = f'https://firestore.googleapis.com/v1/projects/{FIRESTORE_PROJECT}/databases/(default)/documents'

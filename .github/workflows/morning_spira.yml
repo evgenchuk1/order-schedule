@@ -21,3 +21,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run cloud spira notifier
         run: python3 .github/scripts/notify_spira_cloud.py
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          GMAIL_APP_PWD: ${{ secrets.GMAIL_APP_PWD }}
