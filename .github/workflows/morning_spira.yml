@@ -1,17 +1,8 @@
 name: 📋 Spira counting reminders
 
 on:
-  # Israel summer = UTC+3 (March-October); winter jobs arrive 1h earlier — acceptable.
-  # Cloud-only backup for when the PC is off — precise path is Task Scheduler
-  # running notify_spira.py every 5 min, see run_notify_spira.bat/.vbs.
-  schedule:
-    - cron: '30 3 * * *'   # 06:30 IL
-    - cron: '30 4 * * *'   # 07:30 IL
-    - cron: '30 5 * * *'   # 08:30 IL
-    - cron: '30 6 * * *'   # 09:30 IL
-    - cron: '30 7 * * *'   # 10:30 IL
-    - cron: '30 8 * * *'   # 11:30 IL
-    - cron: '30 9 * * *'   # 12:30 IL — last reminder
+  # Schedule disabled 2026-10-23 — Spira reminders no longer wanted
+  # (local SpiraScheduleNotify5Min task disabled too). Manual run only.
   workflow_dispatch: {}
 
 jobs:
