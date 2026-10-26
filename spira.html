@@ -109,13 +109,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
                width:40px;height:40px;font-size:22px;cursor:pointer;color:#fff;
                display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;}
 .sect-hdr-titles{flex:1;}
-.sect-hdr-title{font-size:24px;font-weight:800;color:#fff;}
-.sect-hdr-sub{font-size:13px;color:rgba(255,255,255,.78);margin-top:3px;}
+.sect-hdr-title{font-size:32px;font-weight:800;color:#fff;}
+.sect-hdr-sub{font-size:19px;color:rgba(255,255,255,.78);margin-top:3px;}
 .sect-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
            padding:12px 14px max(28px,env(safe-area-inset-bottom));}
 
 .note-box{background:#FBF6EA;border-radius:14px;padding:12px 14px;
-          font-size:13px;color:#6B5530;border-right:3px solid #CFAB6F;
+          font-size:19px;color:#6B5530;border-right:3px solid #CFAB6F;
           line-height:1.65;margin-top:6px;}
 
 /* חור במדף */
@@ -123,44 +123,44 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .day-card{background:#fff;border-radius:18px;margin-bottom:12px;overflow:hidden;box-shadow:0 2px 8px rgba(32,53,80,.08);}
 .day-card.is-today{box-shadow:0 4px 18px rgba(15,155,142,.3);outline:2.5px solid #0F9B8E;}
 .day-card.is-next{box-shadow:0 4px 20px rgba(207,171,111,.4);outline:3px solid #CFAB6F;}
-.day-card.is-next .day-hdr-name{font-size:25px;}
-.day-card.is-next .day-chip{font-size:17px;}
+.day-card.is-next .day-hdr-name{font-size:37px;}
+.day-card.is-next .day-chip{font-size:25px;}
 .day-hdr{padding:13px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-.day-hdr-name{font-size:21px;font-weight:800;color:#fff;flex:1;}
-.day-hdr-count{background:rgba(255,255,255,.22);color:#fff;border-radius:10px;padding:2px 10px;font-size:13px;font-weight:700;text-align:center;}
-.day-hdr-today{background:#fff;border-radius:10px;padding:2px 9px;font-size:13px;font-weight:700;color:#0A7A6E;text-align:center;}
+.day-hdr-name{font-size:32px;font-weight:800;color:#fff;flex:1;}
+.day-hdr-count{background:rgba(255,255,255,.22);color:#fff;border-radius:10px;padding:2px 10px;font-size:19px;font-weight:700;text-align:center;}
+.day-hdr-today{background:#fff;border-radius:10px;padding:2px 9px;font-size:19px;font-weight:700;color:#0A7A6E;text-align:center;}
 .hdr-a{background:linear-gradient(135deg,#0F9B8E,#0A7A6E);}
 .hdr-b{background:linear-gradient(135deg,#E67E22,#CA6F1E);}
 .hdr-c{background:linear-gradient(135deg,#2980B9,#1F6FA0);}
 .hdr-d{background:linear-gradient(135deg,#8E44AD,#7A3B96);}
 .hdr-e{background:linear-gradient(135deg,#27AE60,#1F8F4E);}
 .day-items{padding:12px 14px;display:flex;flex-wrap:wrap;gap:7px;}
-.day-chip{display:inline-block;background:#EEF1F6;border-radius:10px;padding:6px 12px;font-size:15px;color:#1B2A41;}
+.day-chip{display:inline-block;background:#EEF1F6;border-radius:10px;padding:8px 14px;font-size:22px;color:#1B2A41;}
 
 /* Timeline */
-.tl-week-lbl{font-size:12px;font-weight:700;color:#6E7586;padding:4px 4px 7px;letter-spacing:.4px;}
+.tl-week-lbl{font-size:18px;font-weight:700;color:#6E7586;padding:4px 4px 7px;letter-spacing:.4px;}
 .tl-item{background:#fff;border-radius:14px;padding:13px 14px;margin-bottom:9px;display:flex;gap:12px;box-shadow:0 1px 5px rgba(32,53,80,.08);}
 .tl-item.is-past{opacity:.42;}
 .tl-item.is-today{outline:2.5px solid var(--acc);box-shadow:0 4px 16px rgba(0,0,0,.12);}
 .tl-item.is-next{outline:3px solid #CFAB6F;box-shadow:0 4px 18px rgba(207,171,111,.35);}
-.tl-item.is-next .tl-dd{font-size:32px;}
-.tl-item.is-next .tl-chip{font-size:17px;font-weight:600;}
+.tl-item.is-next .tl-dd{font-size:48px;}
+.tl-item.is-next .tl-chip{font-size:25px;font-weight:600;}
 .tl-item.is-delayed{opacity:.5;}
-.tl-left{min-width:50px;text-align:center;}
-.tl-dd{font-size:26px;font-weight:900;color:var(--acc);line-height:1.1;}
-.tl-mon{font-size:12px;color:#6E7586;font-weight:600;}
-.tl-dow{font-size:11px;color:#9AA1AE;margin-top:1px;}
+.tl-left{min-width:72px;text-align:center;}
+.tl-dd{font-size:39px;font-weight:900;color:var(--acc);line-height:1.1;}
+.tl-mon{font-size:18px;color:#6E7586;font-weight:600;}
+.tl-dow{font-size:16px;color:#9AA1AE;margin-top:1px;}
 .tl-right{flex:1;display:flex;flex-direction:column;justify-content:center;gap:6px;}
 .tl-tags{display:flex;flex-wrap:wrap;gap:5px;align-items:center;}
-.tl-code{font-size:12px;font-weight:800;border-radius:7px;padding:2px 8px;background:var(--acc-light);color:var(--acc);}
-.tl-today-tag,.tl-delay-tag,.tl-special-tag,.tl-cancel-tag{font-size:12px;font-weight:700;border-radius:7px;padding:2px 8px;text-align:center;}
+.tl-code{font-size:18px;font-weight:800;border-radius:7px;padding:2px 8px;background:var(--acc-light);color:var(--acc);}
+.tl-today-tag,.tl-delay-tag,.tl-special-tag,.tl-cancel-tag{font-size:18px;font-weight:700;border-radius:8px;padding:3px 10px;text-align:center;}
 .tl-today-tag{background:var(--acc-light);color:var(--acc);}
 .tl-delay-tag{background:#FEF9E7;color:#B7770D;}
 .tl-special-tag{background:#D5F5E3;color:#1E8449;}
 .tl-cancel-tag{background:#FDEDEC;color:#943126;}
 .tl-item.is-cancelled{opacity:.45;}
 .tl-chips{display:flex;flex-wrap:wrap;gap:5px;}
-.tl-chip{display:inline-block;background:#EEF1F6;border-radius:8px;padding:4px 10px;font-size:15px;color:#1B2A41;}
+.tl-chip{display:inline-block;background:#EEF1F6;border-radius:8px;padding:6px 12px;font-size:22px;color:#1B2A41;}
 #pachat{--acc:#A8844A;--acc-light:#FBF4E6;}
 #pachat .sect-hdr{background:linear-gradient(135deg,#CFAB6F,#A8844A);}
 #yomi{--acc:#2C4A70;--acc-light:#E9EEF5;}
@@ -227,7 +227,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .cp-logo{display:block;width:120px;margin:0 auto 12px;border-radius:12px;}
 .cp-title{font-size:22px;font-weight:900;color:#203550;margin-bottom:14px;text-align:center;}
 .cp-text{font-size:15px;line-height:1.8;color:#444;}
-.cp-text-en{font-size:7.5px;line-height:1.7;color:#555;direction:ltr;text-align:left;
+.cp-text-en{font-size:15px;line-height:1.7;color:#555;direction:ltr;text-align:left;
             margin-top:14px;padding-top:12px;border-top:1px solid #ECE8DE;}
 .cp-close{margin-top:20px;width:100%;background:linear-gradient(135deg,#2C4A70,#15243A);color:#fff;border:none;
           border-radius:13px;padding:13px;font-size:16px;font-weight:700;
@@ -261,7 +261,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="main-card-inner">
         <div class="main-card-icon">🕳️</div>
         <div class="main-card-text">
-          <div class="main-card-name">חור במדף<span class="en">Shelf Gaps</span></div>
+          <div class="main-card-name">חור במדף<span class="en">Hole on the Shelf</span></div>
           <div class="main-card-sub">סריקה יומית — 10 פלנוגרמות<span class="en">Daily scan — 10 planograms</span></div>
         </div>
         <div class="main-card-pill" id="chorPill"></div>
@@ -328,7 +328,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="sect-hdr">
     <button class="sect-hdr-back" onclick="back()">←</button>
     <div class="sect-hdr-titles">
-      <div class="sect-hdr-title">🕳️ חור במדף<span class="en">Shelf Gaps</span></div>
+      <div class="sect-hdr-title">🕳️ חור במדף<span class="en">Hole on the Shelf</span></div>
       <div class="sect-hdr-sub">בכל יום אחרי הזמנות — 10 פלנוגרמות<span class="en">Every day after orders — 10 planograms</span></div>
     </div>
   </div>
@@ -544,7 +544,7 @@ const SUNDAY_ITEMS = ["מזון תינוקות","עגלות לקוחות","יר�
 // ═══ SPECIAL ONE-TIME ITEMS (тест 13/06/2026) ═══
 const SPECIAL_DATES = {
   '2026-06-13': [
-    {id:'chor_s',   label:'חור במדף',       labelEn:'Shelf Gaps',          color:'#0A7A6E', detail:'טלביזיות, מקררים, מאווררים, חשמל ביתי'},
+    {id:'chor_s',   label:'חור במדף',       labelEn:'Hole on the Shelf',          color:'#0A7A6E', detail:'טלביזיות, מקררים, מאווררים, חשמל ביתי'},
     {id:'yomi_s',   label:'מדיניות זמינות', labelEn:'Availability Policy', color:'#203550', detail:'ירקות'},
     {id:'pachat_s', label:'פחת',             labelEn:'Shrinkage',           color:'#A8844A', detail:'גרילים ופחמים'},
   ]
@@ -652,7 +652,7 @@ function renderHome(){
 
   const lines=[];
   if(cd) lines.push(bi('📍 חור במדף היום: יום '+cd.day+"' — "+cd.items.slice(0,3).join(', ')+'...',
-                       '📍 Shelf gaps today: '+cd.items.slice(0,3).map(tr).join(', ')+'...'));
+                       '📍 Hole on the shelf today: '+cd.items.slice(0,3).map(tr).join(', ')+'...'));
   const todayP=PACHAT.find(p=>p.d===ts&&!p.cancelled);
   if(todayP) lines.push(bi('📉 פחת היום: '+todayP.items.join(', ')+' ['+todayP.codes.join(',')+']',
                            '📉 Shrinkage today: '+todayP.items.map(tr).join(', ')+' ['+todayP.codes.join(',')+']'));
@@ -891,7 +891,7 @@ function getTodaySections(){
     sections.push({
       id:'chor',
       label:'חור במדף',
-      labelEn:'Shelf Gaps',
+      labelEn:'Hole on the Shelf',
       color:'#0A7A6E',
       detail:'יום '+cd.day+"' — "+cd.items.join(', '),
       detailEn:DAYS_EN[dow]+' — '+cd.items.map(tr).join(', ')
