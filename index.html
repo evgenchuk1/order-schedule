@@ -34,6 +34,7 @@
       flex-shrink:0;z-index:10;
       box-shadow:0 2px 14px rgba(0,0,0,0.35);
     }
+    .hdr-logo{width:48px;height:48px;border-radius:12px;object-fit:cover;background:#F4F1EA;border:2px solid #CFAB6F;flex-shrink:0;box-shadow:0 2px 10px rgba(0,0,0,.35);}
     .hdr-title{font-size:1.6rem;font-weight:700;letter-spacing:-0.3px;line-height:1.2;}
     .hdr-date{font-size:1.05rem;opacity:.82;margin-top:5px;}
     .bell{
@@ -188,6 +189,7 @@
     }
     .cp-overlay.active{display:flex;}
     .cp-box{background:#fff;border-radius:22px;padding:28px 24px;max-width:360px;width:100%;max-height:85vh;overflow-y:auto;}
+    .cp-logo{display:block;width:110px;margin:0 auto 10px;border-radius:12px;}
     .cp-title{font-size:20px;font-weight:900;color:var(--primary);margin-bottom:16px;text-align:center;}
     .cp-text{font-size:14px;line-height:1.8;color:#333;}
     .cp-sep{border:none;border-top:1px solid #eee;margin:16px 0;}
@@ -272,9 +274,9 @@
 </head>
 <body>
 
-<div class="hdr">
+<div class="hdr"><img class="hdr-logo" src="et-mark.png" alt="ET studio">
   <div>
-    <div class="hdr-title">🛒 לוז הזמנות — 118 דיל אילת הסתת</div>
+    <div class="hdr-title">לוז הזמנות — 118 דיל אילת הסתת</div>
     <div class="hdr-date" id="hdrDate"></div>
   </div>
   <div style="display:flex;gap:8px;align-items:center;">
@@ -288,24 +290,24 @@
 <div class="scroll">
   <div class="container" id="container"></div>
   <footer class="app-footer">
-    <span class="cp-link" onclick="document.getElementById('cpOverlay').classList.add('active')">© Evgeniy Tsipis 2026 — All rights reserved · כל הזכויות שמורות</span>
+    <span class="cp-link" onclick="document.getElementById('cpOverlay').classList.add('active')">© 2026 ET studio · Evgeniy Tsipis — All rights reserved · כל הזכויות שמורות</span>
   </footer>
 </div>
 
 <!-- Copyright modal -->
 <div class="cp-overlay" id="cpOverlay" onclick="if(event.target===this)this.classList.remove('active')">
   <div class="cp-box">
-    <div class="cp-title">זכויות יוצרים · Copyright</div>
+    <img class="cp-logo" src="et-logo.jpg" alt="ET studio"><div class="cp-title">זכויות יוצרים · Copyright</div>
     <div class="cp-text" style="text-align:right; direction:rtl;">
-      © כל הזכויות שמורות ליבגני ציפיס 2026<br><br>
-      יישום זה פותח ועוצב על ידי יבגני ציפיס עבור סניף שופרסל 118, לצורך ניהול לוז הזמנות סחורה.<br><br>
+      © כל הזכויות שמורות ליבגני ציפיס, ET studio 2026<br><br>
+      יישום זה פותח ועוצב על ידי יבגני ציפיס (ET studio) עבור סניף שופרסל 118, לצורך ניהול לוז הזמנות סחורה.<br><br>
       חל איסור על העתקה, הפצה או שימוש מסחרי בכל חלק מהיישום ללא אישור בכתב מהמחבר.<br><br>
       כל הסימנים המסחריים הם רכושם של בעליהם בהתאמה.
     </div>
     <hr class="cp-sep">
     <div class="cp-text" style="text-align:left; direction:ltr;">
-      © 2026 Evgeniy Tsipis. All rights reserved.<br><br>
-      This application was developed and designed by Evgeniy Tsipis for Shufersal branch 118, to manage the goods ordering schedule.<br><br>
+      © 2026 Evgeniy Tsipis, ET studio. All rights reserved.<br><br>
+      This application was developed and designed by Evgeniy Tsipis (ET studio) for Shufersal branch 118, to manage the goods ordering schedule.<br><br>
       Copying, distribution or commercial use of any part of this application without the author's written permission is prohibited.<br><br>
       All trademarks are the property of their respective owners.
     </div>

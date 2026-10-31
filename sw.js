@@ -1,8 +1,8 @@
 // OneSignal push support — must be first
 importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
 
-const CACHE = 'order-v5';
-const FILES = ['./index.html', './manifest.json', './icon-192.png', './icon-512.png'];
+const CACHE = 'order-v6';
+const FILES = ['./index.html', './manifest.json', './icon-192.png', './icon-512.png', './et-mark.png', './et-logo.jpg'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));
