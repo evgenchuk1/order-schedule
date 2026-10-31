@@ -4,331 +4,281 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="הזמנות 118">
-  <meta name="theme-color" content="#CC0030">
+  <meta name="theme-color" content="#1a3a5c">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
   <title>לוז הזמנות סחורה — 118 דיל אילת הסתת</title>
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <style>
-    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
     :root{
-      --primary:#CC0030;--primary-dark:#990020;--primary-grad:linear-gradient(135deg,#DD0030,#AA0020);
-      --bg:#FFECEC;--text:#2A0010;--muted:#885566;
-      --green-bg:#EAF3DE;--green-b:#7DBE44;--green-t:#27500A;
-      --teal-bg:#E1F5EE;--teal-b:#5DCAA5;--teal-t:#085041;
-      --blue-bg:#E6F1FB;--blue-b:#85B7EB;--blue-t:#0C447C;
-      --purple-bg:#EEEDFE;--purple-b:#AFA9EC;--purple-t:#26215C;
-      --coral-bg:#FAECE7;--coral-b:#F0997B;--coral-t:#4A1B0C;
-      --amber-bg:#FAEEDA;--amber-b:#EF9F27;--amber-t:#633806;
-      --red-bg:#FCEBEB;--red-b:#F09595;--red-t:#501313;
-      --pink-bg:#FBEAF0;--pink-b:#ED93B1;--pink-t:#4B1528;
+      --primary:#1a3a5c;--primary-mid:#2563a8;--bg:#f0f3f8;--surface:#ffffff;
+      --text:#12263a;--muted:#6b7280;--radius:14px;--shadow:0 2px 10px rgba(0,0,0,0.14);
     }
     html,body{height:100%;overflow:hidden;}
     body{
-      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
-      background:var(--bg);
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
+      background:var(--bg);color:var(--text);
       display:flex;flex-direction:column;
       padding-top:env(safe-area-inset-top);
+      -webkit-font-smoothing:antialiased;
     }
 
     /* ─── Header ─── */
     .hdr{
-      background:var(--primary-grad);
-      color:#fff;
-      padding:12px 16px 10px;
-      display:flex;align-items:center;justify-content:space-between;
-      flex-shrink:0;
-      box-shadow:0 4px 20px rgba(180,0,40,.5);
-      z-index:10;
+      background:var(--primary);color:#fff;
+      padding:18px 16px 14px;
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      flex-shrink:0;z-index:10;
+      box-shadow:0 2px 14px rgba(0,0,0,0.35);
     }
-    .hdr-brand{display:flex;align-items:center;gap:10px;}
-    .hdr-logo{width:44px;height:44px;border-radius:11px;object-fit:cover;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.3);}
-    .hdr-title{font-size:20px;font-weight:900;line-height:1.2;}
-    .hdr-date{font-size:14px;opacity:.82;margin-top:2px;}
+    .hdr-title{font-size:1.6rem;font-weight:700;letter-spacing:-0.3px;line-height:1.2;}
+    .hdr-date{font-size:1.05rem;opacity:.82;margin-top:5px;}
     .bell{
-      background:rgba(255,255,255,.18);border:none;border-radius:50%;
-      width:40px;height:40px;font-size:20px;cursor:pointer;
-      display:flex;align-items:center;justify-content:center;
-      transition:background .2s;flex-shrink:0;
+      background:rgba(255,255,255,0.15);border:none;border-radius:50%;
+      width:40px;height:40px;font-size:1.3rem;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;flex-shrink:0;
     }
-    .bell:active{background:rgba(255,255,255,.35);}
+    .bell:active{opacity:.6;}
 
     /* ─── Day tabs ─── */
     .tabs{
-      display:flex;overflow-x:auto;scrollbar-width:none;
-      background:#fff;border-bottom:2px solid #F5D0D8;
-      flex-shrink:0;z-index:9;
+      display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;
+      background:var(--surface);padding:10px 8px;
+      flex-shrink:0;z-index:9;box-shadow:0 2px 6px rgba(0,0,0,0.07);
     }
     .tabs::-webkit-scrollbar{display:none;}
     .tab{
-      flex:0 0 auto;padding:13px 18px 11px;
-      font-size:20px;font-weight:600;color:#888;cursor:pointer;
-      border-bottom:3px solid transparent;white-space:nowrap;
-      transition:color .15s;position:relative;user-select:none;
+      flex:0 0 auto;padding:8px 18px;
+      border:2px solid var(--primary);border-radius:999px;
+      font-size:1.09rem;font-weight:600;color:var(--primary);cursor:pointer;
+      white-space:nowrap;transition:all .16s;user-select:none;
     }
-    .tab.active{color:var(--primary);border-bottom-color:var(--primary);}
-    .tab.today{color:#C0392B;}
-    .tab.today.active{color:#C0392B;border-bottom-color:#C0392B;}
+    .tab.active{background:var(--primary);color:#fff;}
+    .tab:active{opacity:.65;}
     .badge{
       display:inline-flex;align-items:center;justify-content:center;
-      background:#E74C3C;color:#fff;border-radius:11px;
+      background:#dc2626;color:#fff;border-radius:11px;
       font-size:14px;min-width:22px;height:22px;padding:0 5px;
-      margin-right:4px;vertical-align:middle;font-weight:700;
+      margin-left:6px;vertical-align:middle;font-weight:700;
     }
 
     /* ─── Scroll area ─── */
     .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-    .container{padding:14px;max-width:520px;margin:0 auto;}
+    .container{padding:14px 12px;max-width:520px;margin:0 auto;}
 
     /* ─── Progress ─── */
     .prog{
-      background:#fff;border-radius:14px;padding:13px 16px;
-      margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.07);
+      background:var(--surface);border-radius:var(--radius);padding:13px 16px;
+      margin-bottom:10px;box-shadow:var(--shadow);
     }
-    .prog-label{font-size:16px;color:#888;margin-bottom:7px;display:flex;justify-content:space-between;}
-    .prog-bar{height:8px;background:#EDF2F7;border-radius:4px;overflow:hidden;}
-    .prog-fill{height:100%;background:linear-gradient(90deg,#27AE60,#2ECC71);
-      border-radius:4px;transition:width .6s ease;will-change:width;}
-    .prog-done{margin-top:5px;font-size:16px;color:#27AE60;font-weight:600;}
+    .prog-label{font-size:1rem;font-weight:600;color:var(--muted);margin-bottom:7px;display:flex;justify-content:space-between;}
+    .prog-bar{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;}
+    .prog-fill{height:100%;background:#15803d;border-radius:4px;transition:width .6s ease;will-change:width;}
+    .prog-done{margin-top:5px;font-size:1rem;color:#15803d;font-weight:600;}
 
     /* ─── Order cards ─── */
     .card{
-      background:#fff;border-radius:14px;padding:12px 14px;
-      margin-bottom:9px;display:flex;align-items:center;gap:11px;
-      box-shadow:0 1px 3px rgba(0,0,0,.07);
-      border-right:4px solid #ddd;
-      transition:opacity .3s,transform .2s;position:relative;
-      cursor:default;
+      border-radius:var(--radius);padding:14px 16px;
+      margin-bottom:10px;display:flex;align-items:center;gap:14px;
+      box-shadow:var(--shadow);
+      background:var(--primary);color:#fff;
+      transition:opacity .3s,transform .12s;position:relative;
     }
-    .card.c-green{border-right-color:var(--green-b);}
-    .card.c-teal{border-right-color:var(--teal-b);}
-    .card.c-blue{border-right-color:var(--blue-b);}
-    .card.c-purple{border-right-color:var(--purple-b);}
-    .card.c-coral{border-right-color:var(--coral-b);}
-    .card.c-amber{border-right-color:var(--amber-b);}
-    .card.c-red{border-right-color:var(--red-b);}
-    .card.c-pink{border-right-color:var(--pink-b);}
-
-    .card.done{opacity:.42;}
-    .card.done .cname{text-decoration:line-through;color:#aaa;}
-
-    .card.urgent:not(.done){
-      border-right-color:#E74C3C!important;
-      background:#FFF5F5;
-      animation:pulseBorder 1.8s infinite;
-    }
-    .card.warning:not(.done){
-      border-right-color:#E67E22!important;
-      background:#FFFBF5;
-    }
-    @keyframes pulseBorder{
-      0%{box-shadow:0 1px 3px rgba(231,76,60,.15);}
-      50%{box-shadow:0 3px 18px rgba(231,76,60,.45);}
-      100%{box-shadow:0 1px 3px rgba(231,76,60,.15);}
+    .card.st-ok{background:#15803d;color:#fff;}
+    .card.st-warn{background:#d97706;color:#1a1a1a;}
+    .card.st-hot{background:#dc2626;color:#fff;animation:pulseRed 2s ease-in-out infinite;}
+    .card.st-over{background:#450a0a;color:#fca5a5;animation:pulseRed 2s ease-in-out infinite;}
+    .card.done{background:#e5e7eb;color:var(--muted);opacity:.75;box-shadow:none;}
+    .card.done .cname{text-decoration:line-through;}
+    @keyframes pulseRed{
+      0%,100%{box-shadow:0 2px 10px rgba(0,0,0,0.2);}
+      50%{box-shadow:0 0 24px rgba(220,38,38,0.65);}
     }
 
-    .cicon{font-size:36px;flex-shrink:0;width:42px;text-align:center;}
+    .cicon{font-size:2.2rem;flex-shrink:0;width:42px;text-align:center;}
     .cinfo{flex:1;min-width:0;}
-    .cname{font-size:21px;font-weight:600;color:#1a1a2e;line-height:1.3;}
-    .cmeta{font-size:16px;color:#999;margin-top:4px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+    .cname{font-size:1.33rem;font-weight:700;line-height:1.3;}
+    .cmeta{margin-top:5px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
 
-    .dl{
+    .dl,.dlday{
       display:inline-flex;align-items:center;gap:3px;
-      border-radius:8px;padding:3px 9px;font-size:16px;font-weight:700;
+      border-radius:8px;padding:3px 9px;font-size:1rem;font-weight:700;
+      background:rgba(255,255,255,0.2);color:inherit;
     }
-    .dl.ok{background:#D5F5E3;color:#1E8449;}
-    .dl.warn{background:#FDECD0;color:#D35400;}
-    .dl.hot{background:#FDEBD0;color:#BA4A00;}
-    .dl.over{background:#FDEDEC;color:#C0392B;}
+    .card.done .dl,.card.done .dlday{background:rgba(0,0,0,0.07);}
 
     .chk{
       width:46px;height:46px;border-radius:50%;
-      border:2.5px solid #D5D8DC;background:#fff;
+      border:2.5px solid rgba(255,255,255,0.7);background:transparent;color:inherit;
       cursor:pointer;display:flex;align-items:center;justify-content:center;
       font-size:24px;flex-shrink:0;
       transition:background .2s,border-color .2s,transform .15s;
       -webkit-user-select:none;user-select:none;
     }
     .chk:active{transform:scale(.88);}
-    .chk.checked{background:#27AE60;border-color:#27AE60;color:#fff;}
+    .chk.checked{background:#15803d;border-color:#15803d;color:#fff;}
 
-    .empty{text-align:center;padding:50px 20px;color:#BCC0C5;font-size:15px;}
+    .empty{text-align:center;padding:70px 24px;color:var(--muted);font-size:1.4rem;font-weight:600;}
 
     /* ─── Alarm overlay ─── */
     .overlay{
       display:none;position:fixed;inset:0;
-      background:rgba(0,0,0,.72);z-index:1000;
+      background:rgba(0,0,0,.55);z-index:1000;
       align-items:center;justify-content:center;padding:20px;
     }
     .overlay.on{display:flex;}
     .modal{
-      background:#fff;border-radius:22px;padding:26px 22px;
-      max-width:340px;width:100%;text-align:center;
+      background:#fff;border-radius:22px;padding:28px 24px;
+      max-width:360px;width:100%;max-height:85vh;overflow-y:auto;text-align:center;
       animation:popIn .25s ease;
     }
     @keyframes popIn{from{transform:scale(.88);opacity:0;}to{transform:scale(1);opacity:1;}}
     .m-icon{font-size:52px;margin-bottom:10px;}
-    .m-title{font-size:26px;font-weight:800;color:#1a1a2e;margin-bottom:5px;}
-    .m-sub{font-size:18px;color:#E74C3C;font-weight:600;margin-bottom:16px;}
-    .m-items{background:#F8F9FA;border-radius:12px;padding:10px 12px;margin-bottom:18px;text-align:right;}
-    .m-item{padding:9px 0;border-bottom:1px solid #EEE;font-size:18px;line-height:1.4;}
+    .m-title{font-size:1.53rem;font-weight:700;color:var(--primary);margin-bottom:5px;}
+    .m-sub{font-size:1.09rem;color:#dc2626;font-weight:600;margin-bottom:16px;}
+    .m-items{background:#f3f4f6;border-radius:12px;padding:10px 12px;margin-bottom:18px;text-align:right;}
+    .m-item{padding:9px 0;border-bottom:1px solid #e5e7eb;font-size:1.09rem;line-height:1.4;}
     .m-item:last-child{border-bottom:none;}
-    .m-item strong{color:#1a1a2e;}
-    .m-item small{color:#E74C3C;font-weight:600;}
+    .m-item strong{color:var(--text);}
+    .m-item small{color:#dc2626;font-weight:600;}
     .mbtn{
-      width:100%;padding:14px;border:none;border-radius:13px;
-      font-size:19px;font-weight:700;cursor:pointer;margin-bottom:9px;
-      transition:opacity .15s;
+      width:100%;padding:15px;border:none;border-radius:12px;
+      font-size:1.2rem;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:9px;
     }
-    .mbtn:active{opacity:.8;}
-    .mbtn-ok{background:#27AE60;color:#fff;}
-    .mbtn-snooze{background:#F0F4F8;color:#555;font-size:13px;padding:12px;}
+    .mbtn:active{opacity:.72;}
+    .mbtn-ok{background:var(--primary);color:#fff;}
+    .mbtn-snooze{background:#f3f4f6;color:var(--muted);font-size:1rem;}
 
-    /* ─── Toast (replaces alert() — blocked in iOS PWA standalone) ─── */
+    /* ─── Snackbar ─── */
     .toast{
-      position:fixed;bottom:32px;left:50%;transform:translateX(-50%);
-      background:rgba(20,20,20,.92);color:#fff;padding:13px 22px;
-      border-radius:16px;font-size:15px;z-index:3000;
-      max-width:88%;text-align:center;line-height:1.5;pointer-events:none;
-      animation:toastIn .2s ease;
+      position:fixed;bottom:100px;left:50%;transform:translateX(-50%);
+      background:#1f2937;color:#fff;padding:13px 26px;
+      border-radius:24px;font-size:1.1rem;z-index:3000;
+      max-width:90vw;text-align:center;line-height:1.5;pointer-events:none;
+      animation:toastIn .26s cubic-bezier(0.32,0.72,0,1);
     }
-    @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(8px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+    @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(16px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
 
-    /* ─── Delivery day badge ─── */
-    .dlday{
-      display:inline-flex;align-items:center;gap:3px;
-      border-radius:8px;padding:3px 9px;font-size:14px;font-weight:600;
-      background:#EEF2FF;color:#4338CA;
-    }
-    .ccat{font-size:14px;color:#777;margin-top:2px;}
+    /* ─── Categories ─── */
+    .ccat{display:block;font-size:14px;opacity:.9;margin-top:5px;line-height:1.5;}
+    .cat-key{font-size:1.5em;font-weight:800;}
 
     /* ─── Setup tip ─── */
     .tip{
-      background:#EAF4FD;border-radius:14px;padding:13px 15px;
-      margin-top:6px;margin-bottom:14px;font-size:12px;color:#2471A3;
-      border-right:3px solid #2471A3;
+      background:var(--surface);border-radius:var(--radius);padding:13px 15px;
+      margin-top:6px;margin-bottom:14px;font-size:.92rem;color:var(--muted);line-height:1.45;
+      box-shadow:var(--shadow);
     }
-    .tip b{display:block;margin-bottom:4px;font-size:13px;}
+    .tip b{display:block;margin-bottom:4px;color:var(--primary);}
     .tip ol{padding-right:16px;margin-top:5px;}
     .tip ol li{margin-bottom:3px;}
 
-    /* ─── Copyright bar ─── */
-    .copyright{
-      text-align:center;font-size:11px;color:var(--muted);
-      padding:6px 16px;background:#fff;border-top:1px solid #F5D0D8;
-      flex-shrink:0;cursor:pointer;user-select:none;
-    }
-    .copyright:active{opacity:.7;}
-    /* Copyright modal */
+    /* ─── Footer ─── */
+    .app-footer{text-align:center;padding:12px 16px 104px;} /* room for the FAB */
+    .cp-link{font-size:11px;color:rgba(0,0,0,.45);cursor:pointer;text-decoration:underline;}
+
+    /* ─── Copyright modal ─── */
     .cp-overlay{
-      display:none;position:fixed;inset:0;
-      background:rgba(0,0,0,.68);z-index:2000;
+      position:fixed;inset:0;z-index:2000;
+      background:rgba(0,0,0,.55);display:none;
       align-items:center;justify-content:center;padding:20px;
     }
-    .cp-overlay.on{display:flex;}
-    .cp-modal{
-      background:#fff;border-radius:20px;padding:24px 20px 20px;
-      max-width:340px;width:100%;text-align:center;
-      animation:popIn .22s ease;
-    }
-    .cp-logo{width:60px;height:60px;border-radius:14px;object-fit:cover;margin-bottom:10px;box-shadow:0 2px 10px rgba(180,0,40,.25);}
-    .cp-title{font-size:17px;font-weight:800;color:var(--primary);margin-bottom:12px;}
-    .cp-text{font-size:13px;color:#555;line-height:1.7;text-align:right;}
-    .cp-close{
-      width:100%;margin-top:16px;padding:13px;border:none;border-radius:13px;
-      background:var(--primary-grad);color:#fff;font-size:16px;font-weight:700;cursor:pointer;
-    }
+    .cp-overlay.active{display:flex;}
+    .cp-box{background:#fff;border-radius:22px;padding:28px 24px;max-width:360px;width:100%;max-height:85vh;overflow-y:auto;}
+    .cp-title{font-size:20px;font-weight:900;color:var(--primary);margin-bottom:16px;text-align:center;}
+    .cp-text{font-size:14px;line-height:1.8;color:#333;}
+    .cp-sep{border:none;border-top:1px solid #eee;margin:16px 0;}
+    .cp-close{margin-top:22px;width:100%;background:var(--primary);color:#fff;border:none;border-radius:13px;padding:13px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;}
 
     /* ─── Warehouse FAB ─── */
     .fab-wh{
-      position:fixed;bottom:28px;left:16px;
-      width:52px;height:52px;border-radius:50%;
-      background:var(--primary-grad);
-      color:#fff;border:none;font-size:22px;
+      position:fixed;bottom:24px;left:20px;
+      width:68px;height:68px;border-radius:50%;
+      background:var(--primary);color:#fff;border:none;font-size:2rem;
       cursor:pointer;z-index:500;
-      box-shadow:0 4px 14px rgba(180,0,40,.4);
+      box-shadow:0 4px 20px rgba(26,58,92,0.55);
       display:flex;align-items:center;justify-content:center;
-      transition:transform .15s,box-shadow .15s;
+      transition:transform .14s;
     }
-    .fab-wh:active{transform:scale(.9);}
+    .fab-wh:active{transform:scale(.86);}
 
+    /* ─── Warehouse list (text +50%) ─── */
     .wh-drop{
-      position:fixed;bottom:90px;left:16px;
-      background:#fff;border-radius:16px;
+      position:fixed;bottom:100px;left:12px;right:12px;max-width:520px;
+      max-height:calc(100vh - 170px);overflow-y:auto;-webkit-overflow-scrolling:touch;
+      background:var(--surface);border-radius:var(--radius);
       box-shadow:0 6px 28px rgba(0,0,0,.22);
-      min-width:248px;z-index:600;
-      overflow:hidden;
-      transform-origin:bottom left;
-      display:none;
+      z-index:600;transform-origin:bottom left;display:none;
     }
     .wh-drop.open{display:block;animation:dropIn .18s ease;}
     @keyframes dropIn{from{transform:scale(.88);opacity:0;}to{transform:scale(1);opacity:1;}}
-    .wh-drop-hdr{
-      padding:10px 15px 8px;font-size:13px;color:#888;
-      border-bottom:1px solid #F0F4F8;font-weight:700;letter-spacing:.3px;
+    .wh-drop-top{position:sticky;top:0;background:var(--surface);z-index:1;padding:12px 15px;border-bottom:1px solid #e5e7eb;}
+    .wh-drop-hdr{font-size:19.5px;color:var(--primary);font-weight:700;margin-bottom:8px;}
+    .wh-search{
+      width:100%;padding:10px 14px;border:2px solid #e5e7eb;border-radius:12px;
+      font-size:19.5px;font-family:inherit;color:var(--text);background:#fafafa;outline:none;
     }
+    .wh-search:focus{border-color:var(--primary-mid);background:#fff;}
+    .wh-group{padding:10px 15px 6px;font-size:18px;font-weight:700;color:var(--muted);background:#f3f4f6;}
     .wh-drop-item{
-      padding:13px 15px;font-size:16px;cursor:pointer;
-      display:flex;align-items:center;gap:9px;
-      border-bottom:1px solid #F5F7FA;color:#1a1a2e;
-      transition:background .12s;
+      padding:14px 15px;font-size:24px;line-height:1.25;cursor:pointer;
+      display:flex;align-items:baseline;gap:10px;
+      border-bottom:1px solid #f3f4f6;color:var(--text);
     }
-    .wh-drop-item:last-child{border-bottom:none;}
-    .wh-drop-item:active{background:#FFF0F2;}
-    .wh-drop-item .wh-num{
-      font-weight:800;color:var(--primary);min-width:44px;font-size:13px;
-    }
+    .wh-drop-item:active{background:#eef2f7;}
+    .wh-drop-item .wh-num{font-weight:800;color:var(--primary);flex:0 0 78px;font-size:19.5px;}
+    .wh-spec{display:block;font-size:18px;color:var(--muted);margin-top:3px;}
 
-    /* ─── Warehouse schedule modal ─── */
+    /* ─── Warehouse schedule sheet (text +50%) ─── */
     .wh-overlay{
       display:none;position:fixed;inset:0;
-      background:rgba(0,0,0,.68);z-index:1100;
-      align-items:center;justify-content:center;padding:14px;
+      background:rgba(0,0,0,0.52);z-index:1100;
+      align-items:flex-end;justify-content:center;
+      backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
     }
     .wh-overlay.on{display:flex;}
     .wh-modal{
-      background:#fff;border-radius:20px;padding:20px 14px 18px;
-      max-width:480px;width:100%;max-height:88vh;overflow-y:auto;
-      animation:popIn .22s ease;
+      background:var(--surface);border-radius:24px 24px 0 0;
+      padding:12px 14px calc(18px + env(safe-area-inset-bottom));
+      max-width:520px;width:100%;max-height:92vh;overflow-y:auto;
+      animation:sheetUp .28s cubic-bezier(0.32,0.72,0,1);
     }
-    .wh-modal-title{
-      font-size:19px;font-weight:800;color:var(--primary);
-      margin-bottom:14px;text-align:center;
-    }
-    .wh-table{width:100%;border-collapse:collapse;font-size:14px;}
+    @keyframes sheetUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+    .sheet-handle{width:44px;height:5px;background:#e0e0e0;border-radius:3px;margin:0 auto 14px;}
+    .wh-modal-title{font-size:28.5px;font-weight:700;color:var(--primary);margin-bottom:6px;text-align:center;line-height:1.2;}
+    .wh-modal-spec{font-size:19.5px;color:var(--muted);text-align:center;margin-bottom:12px;}
+    .wh-table{width:100%;border-collapse:collapse;font-size:21px;}
     .wh-table th{
-      background:#FFECEC;color:var(--primary);padding:9px 7px;
-      text-align:center;font-weight:700;font-size:13px;
+      background:#eef2f7;color:var(--primary);padding:9px 5px;
+      text-align:center;font-weight:700;font-size:19.5px;
     }
-    .wh-table td{
-      padding:9px 7px;text-align:center;
-      border-bottom:1px solid #F5E8EA;color:#333;
-    }
-    .wh-table tr:last-child td{border-bottom:none;}
-    .wh-table tr:nth-child(even) td{background:#FFF8F8;}
+    .wh-table td{padding:10px 5px 4px;text-align:center;color:var(--text);}
+    .wh-table td.wh-time{color:#15803d;font-weight:700;}
+    .wh-table td.wh-del{color:var(--primary-mid);font-weight:700;}
+    .wh-table td.wh-del small{display:block;font-size:18px;font-weight:600;}
+    .wh-table td.wh-cat{padding:0 5px 10px;text-align:right;font-size:19.5px;color:var(--muted);line-height:1.5;}
+    .wh-table tr.wh-last td{border-bottom:1px solid #e5e7eb;}
+    .wh-table .cat-key{color:var(--text);}
     .wh-close{
-      width:100%;margin-top:14px;padding:13px;
-      border:none;border-radius:13px;
-      background:var(--primary-grad);color:#fff;
-      font-size:17px;font-weight:700;cursor:pointer;
+      width:100%;margin-top:14px;padding:15px;border:none;border-radius:12px;
+      background:var(--primary);color:#fff;
+      font-size:25.5px;font-weight:700;font-family:inherit;cursor:pointer;
     }
-    .wh-close:active{opacity:.8;}
+    .wh-close:active{opacity:.72;}
   </style>
 </head>
 <body>
 
 <div class="hdr">
-  <div class="hdr-brand">
-    <img class="hdr-logo" src="logo.jpg" alt="שופרסל">
-    <div>
-      <div class="hdr-title">לוז הזמנות — 118 דיל אילת הסתת</div>
-      <div class="hdr-date" id="hdrDate"></div>
-    </div>
+  <div>
+    <div class="hdr-title">🛒 לוז הזמנות — 118 דיל אילת הסתת</div>
+    <div class="hdr-date" id="hdrDate"></div>
   </div>
   <div style="display:flex;gap:8px;align-items:center;">
-    <button class="bell" id="testBtn" title="בדוק עכשיו" onclick="testAlarmNow()" style="font-size:15px;background:rgba(231,76,60,.35);">🧪</button>
+    <button class="bell" id="testBtn" title="בדוק עכשיו" onclick="testAlarmNow()">🧪</button>
     <button class="bell" id="bellBtn" title="התראות" onclick="handleBell()">🔔</button>
   </div>
 </div>
@@ -337,22 +287,29 @@
 
 <div class="scroll">
   <div class="container" id="container"></div>
+  <footer class="app-footer">
+    <span class="cp-link" onclick="document.getElementById('cpOverlay').classList.add('active')">© Evgeniy Tsipis 2026 — All rights reserved · כל הזכויות שמורות</span>
+  </footer>
 </div>
 
-<div class="copyright" onclick="document.getElementById('cpOverlay').classList.add('on')">© יבגני ציפיס 2026 — כל הזכויות שמורות</div>
-
 <!-- Copyright modal -->
-<div class="cp-overlay" id="cpOverlay" onclick="document.getElementById('cpOverlay').classList.remove('on')">
-  <div class="cp-modal" onclick="event.stopPropagation()">
-    <img class="cp-logo" src="logo.jpg" alt="שופרסל">
-    <div class="cp-title">זכויות יוצרים</div>
-    <div class="cp-text">
+<div class="cp-overlay" id="cpOverlay" onclick="if(event.target===this)this.classList.remove('active')">
+  <div class="cp-box">
+    <div class="cp-title">זכויות יוצרים · Copyright</div>
+    <div class="cp-text" style="text-align:right; direction:rtl;">
       © כל הזכויות שמורות ליבגני ציפיס 2026<br><br>
-      יישום זה פותח ועוצב על ידי יבגני ציפיס לצורך ניהול לוז הזמנות סחורה בסניף 118 — דיל אילת הסתת.<br><br>
+      יישום זה פותח ועוצב על ידי יבגני ציפיס עבור סניף שופרסל 118, לצורך ניהול לוז הזמנות סחורה.<br><br>
       חל איסור על העתקה, הפצה או שימוש מסחרי בכל חלק מהיישום ללא אישור בכתב מהמחבר.<br><br>
       כל הסימנים המסחריים הם רכושם של בעליהם בהתאמה.
     </div>
-    <button class="cp-close" onclick="document.getElementById('cpOverlay').classList.remove('on')">סגור ✕</button>
+    <hr class="cp-sep">
+    <div class="cp-text" style="text-align:left; direction:ltr;">
+      © 2026 Evgeniy Tsipis. All rights reserved.<br><br>
+      This application was developed and designed by Evgeniy Tsipis for Shufersal branch 118, to manage the goods ordering schedule.<br><br>
+      Copying, distribution or commercial use of any part of this application without the author's written permission is prohibited.<br><br>
+      All trademarks are the property of their respective owners.
+    </div>
+    <button class="cp-close" onclick="document.getElementById('cpOverlay').classList.remove('active')">סגירה · Close</button>
   </div>
 </div>
 
@@ -373,29 +330,25 @@
 
 <!-- Warehouse dropdown -->
 <div class="wh-drop" id="whDrop">
-  <div class="wh-drop-hdr">בחר מרכז הפצה</div>
-  <div class="wh-drop-item" onclick="showWarehouseSchedule('6000')"><span class="wh-num">6000</span>🏭 ראשון לציון</div>
-  <div class="wh-drop-item" onclick="showWarehouseSchedule('6030')"><span class="wh-num">6030</span>🏪 מודיעין</div>
-  <div class="wh-drop-item" onclick="showWarehouseSchedule('6031')"><span class="wh-num">6031</span>🐔 שוהם מצוננים</div>
-  <div class="wh-drop-item" onclick="showWarehouseSchedule('6032')"><span class="wh-num">6032</span>🧊 שוהם קטיף</div>
-  <div class="wh-drop-item" onclick="showWarehouseSchedule('6033')"><span class="wh-num">6033</span>❄️ שוהם קפואים</div>
-  <div class="wh-drop-item" onclick="showWarehouseSchedule('6047')"><span class="wh-num">6047</span>🌿 לב הארץ</div>
-  <div class="wh-drop-item" onclick="showWarehouseSchedule('913609')"><span class="wh-num">913609</span>🧀 שטראוס גרופ (מצונן)</div>
-  <div class="wh-drop-item" onclick="showWarehouseSchedule('901212')"><span class="wh-num">901212</span>🥛 תנובה — אגף החלב</div>
-  <div class="wh-drop-item" onclick="showWarehouseSchedule('914182')"><span class="wh-num">914182</span>🧃 החברה המרכזית — טרה</div>
+  <div class="wh-drop-top">
+    <div class="wh-drop-hdr">בחר מרכז הפצה</div>
+    <input class="wh-search" id="whSearch" type="search" placeholder="🔍 חיפוש ספק או קוד" oninput="filterWh(this.value)">
+  </div>
+  <div id="whList"></div>
 </div>
 
-<!-- Warehouse schedule modal -->
+<!-- Warehouse schedule sheet -->
 <div class="wh-overlay" id="whOverlay" onclick="closeWhModal()">
   <div class="wh-modal" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
     <div class="wh-modal-title" id="whModalTitle"></div>
+    <div class="wh-modal-spec" id="whModalSpec"></div>
     <table class="wh-table">
       <thead>
         <tr>
           <th>יום הזמנה</th>
           <th>עד שעה</th>
           <th>יום אספקה</th>
-          <th>קטגוריות</th>
         </tr>
       </thead>
       <tbody id="whTableBody"></tbody>
@@ -417,7 +370,7 @@ const SCH = {
     {id:'s0a',nm:'שוהם מצוננים 6031',dl:'09:05',dlDay:'שני',nt:'עוף טרי',ic:'🐔',cl:'teal'},
     {id:'s0b',nm:'שוהם מצוננים 6031',dl:'10:05',dlDay:'שלישי',nt:'בשר טרי',ic:'🥩',cl:'red'},
     {id:'s0c',nm:'שוהם קטיף 6032',dl:'10:05',dlDay:'שני',nt:'15° / 4° / מכולת',ic:'🧊',cl:'blue'},
-    {id:'s0d',nm:'מודיעין 6030',dl:'12:05',dlDay:'שני',nt:'מכולת / גרין / פארם / חומרי עזר / NF / בודדים',ic:'🏪',cl:'green'},
+    {id:'s0d',nm:'מודיעין 6030',dl:'12:05',dlDay:'שני',nt:'מכולת / גרין / פארם / חומרי עזר',ic:'🏪',cl:'green'},
     {id:'s0e',nm:'שוהם קטיף 6032 — משוקלד',dl:'12:05',dlDay:'שני',nt:'משוקלד',ic:'🍫',cl:'amber'},
     {id:'s0f',nm:'שטראוס גרופ (מצונן)',dl:'13:00',dlDay:'שני',nt:'מוצרי חלב מצוננים',ic:'🧀',cl:'pink'},
     {id:'s0g',nm:'תנובה — אגף החלב',dl:'14:00',dlDay:'שני',nt:'חלב / מוצרי חלב',ic:'🥛',cl:'blue'},
@@ -429,7 +382,7 @@ const SCH = {
     {id:'s1c',nm:'שוהם קטיף 6032',dl:'10:05',dlDay:'שלישי',nt:'15° / 4° / מכולת',ic:'🧊',cl:'blue'},
     {id:'s1d',nm:'יפאורה',dl:'12:00',dlDay:'רביעי',nt:'',ic:'🍵',cl:'pink'},
     {id:'s1e',nm:'טרה — משקאות',dl:'12:00',dlDay:'שלישי',nt:'',ic:'🧃',cl:'coral'},
-    {id:'s1f',nm:'ראשון לציון 6000',dl:'12:05',dlDay:'שלישי',nt:'מכולת / פארם / חומרי עזר / NF / ניקיון אזור צפוני / מאפית',ic:'🏭',cl:'green'},
+    {id:'s1f',nm:'ראשון לציון 6000',dl:'12:05',dlDay:'שלישי',nt:'מכולת / פארם / חומרי עזר / NF / ניקיון אזור צפוני / מאפית / ציוד',ic:'🏭',cl:'green'},
     {id:'s1g',nm:'שוהם קטיף 6032 — משוקלד',dl:'12:05',dlDay:'שלישי',nt:'משוקלד',ic:'🍫',cl:'amber'},
     {id:'s1h',nm:'שטראוס גרופ (מצונן)',dl:'13:00',dlDay:'שלישי',nt:'מוצרי חלב מצוננים',ic:'🧀',cl:'pink'},
     {id:'s1i',nm:'תנובה — אגף החלב',dl:'14:00',dlDay:'שלישי',nt:'חלב / מוצרי חלב',ic:'🥛',cl:'blue'},
@@ -438,8 +391,8 @@ const SCH = {
     {id:'s2a',nm:'שוהם מצוננים 6031',dl:'09:05',dlDay:'רביעי',nt:'עוף טרי',ic:'🐔',cl:'teal'},
     {id:'s2b',nm:'שוהם מצוננים 6031',dl:'10:05',dlDay:'ראשון',nt:'חומרי עזר מאפית',ic:'🥐',cl:'coral'},
     {id:'s2c',nm:'שוהם קטיף 6032',dl:'10:05',dlDay:'רביעי',nt:'15° / 4° / מכולת',ic:'🧊',cl:'blue'},
-    {id:'s2d',nm:'ראשון לציון 6000',dl:'12:05',dlDay:'רביעי',nt:'מכולת / פארם / חומרי עזר / NF / ניקיון אזור צפוני / מאפית',ic:'🏭',cl:'green'},
-    {id:'s2e',nm:'מודיעין 6030',dl:'12:05',dlDay:'רביעי',nt:'מכולת / גרין / פארם / חומרי עזר / NF',ic:'🏪',cl:'green'},
+    {id:'s2d',nm:'ראשון לציון 6000',dl:'12:05',dlDay:'חמישי',nt:'מכולת / פארם / חומרי עזר / NF / ניקיון אזור צפוני / מאפית',ic:'🏭',cl:'green'},
+    {id:'s2e',nm:'מודיעין 6030',dl:'12:05',dlDay:'חמישי',nt:'מכולת / גרין / פארם / חומרי עזר / NF',ic:'🏪',cl:'green'},
     {id:'s2f',nm:'לב הארץ 6047',dl:'12:05',dlDay:'ראשון',nt:'מכולת / משוקלד / גרין / פארם / חומרי עזר / NF / ניקיון אזור צפוני',ic:'🌿',cl:'teal'},
     {id:'s2g',nm:'שטראוס גרופ (מצונן)',dl:'13:00',dlDay:'רביעי',nt:'מוצרי חלב מצוננים',ic:'🧀',cl:'pink'},
     {id:'s2h',nm:'שוהם קפואים 6033',dl:'13:05',dlDay:'חמישי',nt:'חומרי עזר מאפית / קפואים',ic:'❄️',cl:'purple'},
@@ -479,6 +432,16 @@ const SCH = {
   ],
   6:[], // שבת — אין הזמנות
 };
+
+// קטגוריות עיקריות של המחסנים — מודגשות ובגודל +50%
+const KEY_CATS = {
+  'ראשון לציון 6000':['פארם','חומרי עזר','NF','ניקיון אזור צפוני'],
+  'מודיעין 6030':['מכולת','גרין'],
+};
+function catHtml(cat,name){
+  const keys=KEY_CATS[name]||[];
+  return cat.split(' / ').map(c=>keys.includes(c)?`<span class="cat-key">${c}</span>`:c).join(' / ');
+}
 
 // ═══════════════════════════════════════════
 //  STATE
@@ -620,14 +583,10 @@ function renderOrders(){
   for(const item of sorted){
     const st=isToday?itemStatus(item):'none';
     const done=isDone(item.id);
-    let extra='';
-    if(!done&&isToday){
-      if(st==='over'||st==='hot') extra=' urgent';
-      else if(st==='warn') extra=' warning';
-    }
-    const note=item.nt?`<span class="ccat">${item.nt}</span>`:'';
+    const extra=(!done&&isToday&&['ok','warn','hot','over'].includes(st))?` st-${st}`:'';
+    const note=item.nt?`<span class="ccat">${catHtml(item.nt,item.nm)}</span>`:'';
     const dayBadge=item.dlDay?`<span class="dlday">📦 ${item.dlDay}</span>`:'';
-    html+=`<div class="card c-${item.cl}${done?' done':''}${extra}" id="card_${item.id}">
+    html+=`<div class="card${done?' done':''}${extra}" id="card_${item.id}">
       <span class="cicon">${item.ic}</span>
       <div class="cinfo">
         <div class="cname">${item.nm}</div>
@@ -649,7 +608,7 @@ function renderOrders(){
         <li>הוסף פעולה <strong>פתח כתובת URL</strong> → הכנס כתובת האפליקציה</li>
         <li>כבה "שאל לפני הפעלה"</li>
       </ol>
-      <small style="color:#999;font-size:11px">האפליקציה חייבת להיות מותקנת על מסך הבית (Share → Add to Home Screen)</small>
+      <small style="font-size:11px">האפליקציה חייבת להיות מותקנת על מסך הבית (Share → Add to Home Screen)</small>
     </div>`;
   }
 
@@ -874,7 +833,7 @@ function showAlarm(items){
     const timeStr=diff<0
       ?`<small>⚠️ איחור של ${Math.abs(diff)} דקות!</small>`
       :`<small>⏱ נותרו ${diff} דקות (עד ${item.dl})</small>`;
-    const dayStr=item.dlDay?`<small style="color:#4338CA">📦 אספקה: ${item.dlDay}</small>`:'' ;
+    const dayStr=item.dlDay?`<small style="color:#2563a8">📦 אספקה: ${item.dlDay}</small>`:'' ;
     return `<div class="m-item"><strong>${item.ic} ${item.nm}</strong><br>${timeStr}${dayStr?'&nbsp;&nbsp;'+dayStr:''}</div>`;
   }).join('');
 
@@ -1062,18 +1021,21 @@ setInterval(tick,60*1000); // check every minute
 // ═══════════════════════════════════════════
 //  WAREHOUSE SCHEDULES
 // ═══════════════════════════════════════════
-const WH_DATA = {
-  '6000':{name:'ראשון לציון 6000',icon:'🏭',rows:[
-    {od:'שני',ot:'12:05',dd:'שלישי',cat:'מכולת / פארם / חומרי עזר / NF / ניקיון אזור צפוני / מאפית'},
-    {od:'שלישי',ot:'12:05',dd:'רביעי',cat:'מכולת / פארם / חומרי עזר / NF / ניקיון אזור צפוני / מאפית'},
-    {od:'רביעי',ot:'12:05',dd:'חמישי',cat:'מכולת / פארם / חומרי עזר / NF / ניקיון אזור צפוני / מאפית'},
-    {od:'חמישי',ot:'12:05',dd:'ראשון',cat:'מכולת / פארם / חומרי עזר / NF / ניקיון אזור צפוני / בודדים / ציוד משרדי / מאפית'},
+const CAT_6000='מכולת / פארם / חומרי עזר / NF / ניקיון אזור צפוני / מאפית';
+const CAT_6030='מכולת / גרין / פארם / חומרי עזר / NF';
+const CAT_6047='מכולת / משוקלד / גרין / פארם / חומרי עזר / NF / ניקיון אזור צפוני';
+const WH_CENTERS = {
+  '6000':{name:'ראשון לציון 6000',icon:'🏭',spec:'לא-מזון: טואלטיקה, נייר, חד-פעמי ועוד',rows:[
+    {od:'שני',ot:'12:05',dd:'שלישי',cat:CAT_6000+' / ציוד'},
+    {od:'שלישי',ot:'12:05',dd:'חמישי',cat:CAT_6000},
+    {od:'רביעי',ot:'12:05',dd:'חמישי',cat:CAT_6000},
+    {od:'חמישי',ot:'12:05',dd:'ראשון',cat:CAT_6000.replace(' / מאפית','')+' / בודדים / ציוד משרדי / מאפית'},
   ]},
-  '6030':{name:'מודיעין 6030',icon:'🏪',rows:[
-    {od:'ראשון',ot:'12:05',dd:'שני',cat:'מכולת / גרין / פארם / חומרי עזר / NF / בודדים'},
-    {od:'שלישי',ot:'12:05',dd:'רביעי',cat:'מכולת / גרין / פארם / חומרי עזר / NF'},
-    {od:'רביעי',ot:'12:05',dd:'חמישי',cat:'מכולת / גרין / פארם / חומרי עזר / NF'},
-    {od:'חמישי',ot:'12:05',dd:'ראשון',cat:'מכולת / גרין / פארם / חומרי עזר / NF'},
+  '6030':{name:'מודיעין 6030',icon:'🏪',spec:'מזון ומשקאות',rows:[
+    {od:'ראשון',ot:'12:05',dd:'שני',cat:'מכולת / גרין / פארם / חומרי עזר'},
+    {od:'שלישי',ot:'12:05',dd:'חמישי',cat:CAT_6030},
+    {od:'רביעי',ot:'12:05',dd:'חמישי',cat:CAT_6030},
+    {od:'חמישי',ot:'12:05',dd:'ראשון',cat:CAT_6030},
   ]},
   '6031':{name:'שוהם מצוננים 6031',icon:'🐔',rows:[
     {od:'ראשון',ot:'09:05',dd:'שני',cat:'עוף טרי'},
@@ -1083,7 +1045,8 @@ const WH_DATA = {
     {od:'שלישי',ot:'09:05',dd:'רביעי',cat:'עוף טרי'},
     {od:'שלישי',ot:'10:05',dd:'ראשון',cat:'חומרי עזר מאפית'},
     {od:'רביעי',ot:'09:05',dd:'חמישי',cat:'עוף טרי'},
-    {od:'רביעי',ot:'10:05',dd:'ראשון',cat:'בשר טרי / מצונן - חלב ונקניקים / בשר טרי ארוז'},
+    {od:'רביעי',ot:'10:05',dd:'ראשון',cat:'בשר טרי / מצונן - חלב ונקניקים'},
+    {od:'רביעי',ot:'10:05',dd:'',cat:'בשר טרי ארוז'},
     {od:'חמישי',ot:'09:05',dd:'שישי',cat:'עוף טרי'},
     {od:'חמישי',ot:'10:05',dd:'רביעי',cat:'חומרי עזר מאפית'},
   ]},
@@ -1102,31 +1065,227 @@ const WH_DATA = {
     {od:'שלישי',ot:'13:05',dd:'חמישי',cat:'חומרי עזר מאפית / קפואים'},
     {od:'חמישי',ot:'13:05',dd:'שני',cat:'חומרי עזר מאפית / קפואים'},
   ]},
+  '6040':{name:'Har Tuv NF 934',icon:'🏬',rows:[
+    {od:'ראשון',ot:'12:05',dd:'רביעי',cat:'מכולת / NF / ניקיון אזור צפוני'},
+    {od:'שלישי',ot:'12:05',dd:'שני',cat:'מכולת / NF / ניקיון אזור צפוני'},
+  ]},
+  '6042':{name:'לוגיסטיק בריין',icon:'🚛',rows:[
+    {od:'רביעי',ot:'16:00',dd:'חמישי',cat:'קו לבן / עוף טרי / מצונן (סלט+נקניק) / בשר טרי / קפואים שוהם / חשמל קטן / NF / אתר מתנות'},
+  ]},
+  '6044':{name:'הרטוב זמני אמרז',icon:'🏬',rows:[
+    {od:'ראשון',ot:'15:00',dd:'רביעי',cat:'15° / 4°'},
+    {od:'שלישי',ot:'15:00',dd:'שני',cat:'15° / 4°'},
+  ]},
   '6047':{name:'לב הארץ 6047',icon:'🌿',rows:[
-    {od:'שלישי',ot:'12:05',dd:'ראשון',cat:'מכולת / משוקלד / גרין / פארם / חומרי עזר / NF / ניקיון אזור צפוני'},
-    {od:'חמישי',ot:'12:05',dd:'רביעי',cat:'מכולת / משוקלד / גרין / פארם / חומרי עזר / NF / ניקיון אזור צפוני'},
+    {od:'שלישי',ot:'12:05',dd:'ראשון',cat:CAT_6047},
+    {od:'חמישי',ot:'12:05',dd:'רביעי',cat:CAT_6047},
   ]},
-  '913609':{name:'שטראוס גרופ (מצונן)',icon:'🧀',rows:[
-    {od:'ראשון',ot:'13:00',dd:'שני',cat:'מוצרי חלב מצוננים'},
-    {od:'שני',ot:'13:00',dd:'שלישי',cat:'מוצרי חלב מצוננים'},
-    {od:'שלישי',ot:'13:00',dd:'רביעי',cat:'מוצרי חלב מצוננים'},
-    {od:'רביעי',ot:'13:00',dd:'חמישי',cat:'מוצרי חלב מצוננים'},
-    {od:'חמישי',ot:'13:00',dd:'שישי',cat:'מוצרי חלב מצוננים'},
-    {od:'שישי',ot:'10:00',dd:'ראשון',cat:'מוצרי חלב מצוננים'},
-  ]},
-  '901212':{name:'תנובה — אגף החלב',icon:'🥛',rows:[
-    {od:'ראשון',ot:'14:00',dd:'שני',cat:'חלב / מוצרי חלב'},
-    {od:'שני',ot:'14:00',dd:'שלישי',cat:'חלב / מוצרי חלב'},
-    {od:'שלישי',ot:'14:00',dd:'רביעי',cat:'חלב / מוצרי חלב'},
-    {od:'רביעי',ot:'14:00',dd:'חמישי',cat:'חלב / מוצרי חלב'},
-    {od:'חמישי',ot:'14:00',dd:'ראשון',cat:'חלב / מוצרי חלב'},
-  ]},
-  '914182':{name:'החברה המרכזית — טרה',icon:'🧃',rows:[
-    {od:'שני',ot:'12:00',dd:'שלישי',cat:'משקאות'},
-    {od:'רביעי',ot:'12:00',dd:'חמישי',cat:'משקאות'},
-    {od:'חמישי',ot:'12:00',dd:'ראשון',cat:'משקאות'},
+  '6050':{name:'בית חלקיה',icon:'🏬',rows:[
+    {od:'ראשון',ot:'15:00',dd:'רביעי',cat:'15° / 4°'},
+    {od:'שלישי',ot:'15:00',dd:'שני',cat:'15° / 4°'},
   ]},
 };
+const WH_RETURNS = {
+  '6527':{name:'החזרות ראשל"צ',icon:'↩️',rows:['ראשון','שני','רביעי','חמישי'].map(od=>({od,ot:'',dd:'',cat:'15° / 4°'}))},
+  '6530':{name:'החזרות מודיעין',icon:'↩️',rows:['ראשון','שני','שלישי','רביעי','חמישי'].map(od=>({od,ot:'',dd:'',cat:'15° / 4°'}))},
+  '6540':{name:'Har Tuv Return WareHouse',icon:'↩️',rows:['ראשון','שלישי','חמישי'].map(od=>({od,ot:'',dd:'',cat:'15° / 4°'}))},
+};
+// קוד|שם|יום הזמנה שעה יום אספקה שעה;... (דוח ימי הזמנה לסניף, 27/10/2026)
+const WH_SUPPLIERS_RAW = `901048|דיפלומט מפיצים (1968) בע"מ-פרוקטר|שני 12:00 חמישי 12:00;רביעי 12:00 שני 12:00
+901212|תנובה — אגף החלב|ראשון 14:00 שני 8:00;שני 14:00 שלישי 8:00;שלישי 14:00 רביעי 8:00;רביעי 14:00 חמישי 8:00;חמישי 14:00 ראשון 8:00
+901466|מחלבת השומרון|חמישי 12:00 ראשון 8:00
+902117|המגש-שקד בע"מ|חמישי 22:00 שני 9:00
+910029|חלאבין קוסמטיקה בעמ|שני 13:00 שלישי 9:00
+910075|מ.פיינגריש ושות בע"מ|ראשון 13:00 חמישי 9:00
+910320|ס.ל.א.בעמ|ראשון 13:00 שלישי 9:00
+910322|ע.לפידות פרמצוטיקלס בעמ|ראשון 13:00 שלישי 9:00
+910329|אקרמן מ|שני 16:00 שלישי 16:00;רביעי 16:00 חמישי 16:00
+910330|כמיפל בע"מ|ראשון 13:00 שלישי 9:00
+910344|תמר שווק מוצרי בריאות|ראשון 13:00 שלישי 9:00
+910363|החברה דרומית סנו P.L|שני 13:00 רביעי 8:00;חמישי 13:00 שני 8:00
+910367|אופיר את שלפארם צריכה|ראשון 13:00 שלישי 9:00
+910381|טמפו משקאות בע"מ|שלישי 17:00 רביעי 13:00;חמישי 16:00 ראשון 13:00
+910404|החברה הסקוטית למסחר ושיווק בע"מ|חמישי 13:00 שני 7:00
+910583|החברה המאוחדת להפצה ולמס|ראשון 12:00 שלישי 6:00
+910614|אגודת הכורמים-יקבי כרמל|שלישי 13:00 חמישי 7:00;חמישי 12:00 שני 7:00
+910634|נטו מלינדה סחר-דגים טריים|שני 10:00 שלישי 11:00;רביעי 10:00 חמישי 11:00;חמישי 10:00 שני 11:00
+910800|ליימן שליסל בעמ|ראשון 12:00 שלישי 7:00
+912043|ג.וילי-פוד בעמ P.L.|חמישי 12:00 ראשון 8:00
+912142|ברמן-שוקולד ועוגיות בע"מ|שלישי 13:00 חמישי 9:00
+912155|תבורי-שותפות מוגבלת לשיווק|ראשון 13:00 שלישי 10:00;שלישי 13:00 חמישי 9:00;חמישי 13:00 ראשון 14:00
+912235|מחלבת גד (שיווק-1992) בע"מ|שלישי 12:00 רביעי 12:00;חמישי 12:00 ראשון 12:00
+912268|יוניליור ישראל שיווק בעמ|שלישי 13:00 חמישי 6:00;חמישי 13:00 שני 6:00
+912272|יפאורה|שני 12:00 רביעי 14:00;רביעי 12:00 ראשון 14:00
+912316|פלקו בע"מ|שני 12:00 שלישי 8:00
+912317|מ.סידס ובנו בעמ|חמישי 13:00 שני 6:00
+912320|מדי פישר בעמ|חמישי 13:00 שני 6:00
+912414|ג.וויליפוד אינטרנש.גבינות|חמישי 12:00 ראשון 8:00
+912470|ברמן שוקולד ועוגיות P.L.|שלישי 13:00 חמישי 9:00
+912517|הכרם-משקאות חריפים בע"מ|ראשון 13:00 שלישי 6:00
+912602|נגה גלידות שותפות מוגבלת|חמישי 12:00 ראשון 8:00
+912667|אסם בשר אוסטיב|שלישי 15:00 רביעי 9:00;חמישי 15:00 ראשון 9:00
+913002|דיפלומט מפיצים (1968) בע"מ-קוואקר|ראשון 13:00 שלישי 7:00;שלישי 13:00 חמישי 7:00;חמישי 13:00 שני 7:00
+913028|שסטוביץ-מזון|ראשון 13:00 שלישי 10:00;שלישי 13:00 חמישי 10:00
+913058|פינוקים (תעשיות מזון) בע"מ P.L|שלישי 13:00 חמישי 9:00
+913071|נטו מלינדה סחר בע"מ-גבינות|שלישי 12:00 שישי 8:00
+913089|מעדני יחיעם (1993) בע"מ|שלישי 13:00 רביעי 12:00
+913095|תבליני טעם וריח בע"מ PL|שני 13:00 רביעי 6:00
+913119|החברה המרכזית להפצת משקאות (קוקה קולה)|ראשון 23:00 שלישי 12:00;שלישי 23:00 חמישי 12:00;חמישי 15:00 ראשון 8:00
+913136|ש.שוורץ PL|ראשון 13:00 שני 9:00
+913193|קפה סעדי בע"מ|חמישי 15:00 שני 8:00
+913367|ענבי ציון (תנובה בשר)|ראשון 13:00 שני 9:00
+913370|יקבי הר מרון (שקד) בע"מ|חמישי 18:00 שני 8:00
+913375|ישפאר מוצרי צריכה בע"מ|ראשון 13:00 שני 9:00
+913402|מעדני יחיעם P.L.|שלישי 13:00 רביעי 12:00
+913427|סלטי שמיר 2006 בע"מ|ראשון 12:00 שלישי 8:00
+913514|קומפלקס כימיקלים בע"מ|חמישי 18:00 שלישי 8:00
+913515|גורי-כרמית (גורי ע.ע.ע בע"מ)|רביעי 13:00 שני 9:00
+913587|אקן גרין דרך ירוקה בע"מ|ראשון 13:00 שני 9:00
+913609|שטראוס גרופ (מצונן)|ראשון 13:00 שני 8:00;שני 13:00 שלישי 8:00;שלישי 13:00 רביעי 8:00;רביעי 13:00 חמישי 8:00;חמישי 13:00 שישי 8:00;שישי 10:00 ראשון 8:00
+913611|רנדי שקדיה|חמישי 18:00 שני 8:00
+913650|שסטוביץ P.L|ראשון 13:00 שלישי 6:00
+913675|דיפלומט-רד-בול|ראשון 13:00 שלישי 7:00;שלישי 13:00 חמישי 7:00;חמישי 13:00 שני 7:00
+913680|גורי ע.ע.ע.|רביעי 13:00 שני 9:00
+913692|גורי ע.ע.ע. משק לין|חמישי 13:00 שני 9:00
+913703|א.ל.ייצור שיווק תבלינים-PL|חמישי 10:00 שני 10:00
+913716|דנאגים-דנשר-גניר|חמישי 13:00 שני 9:00
+913722|דיפלומט מפיצים (1968) בע"מ-קראפט|ראשון 13:00 שלישי 7:00;שלישי 13:00 חמישי 7:00;חמישי 13:00 שני 7:00
+913725|קפה סעדי P.L|חמישי 15:00 שני 8:00
+913726|פנינה רוזנבלום בע"מ|חמישי 13:00 שני 9:00
+913739|צ.צור סוכנויות בע"מ|ראשון 1:00 שלישי 9:00
+913761|דנאגיס-קנדילנד|חמישי 13:00 שני 9:00
+913780|גורי ע.ע.ע בע"מ-כ.צ.ט|רביעי 13:00 שני 9:00
+913792|ר.ב.מוצרי דגנים בע"מ|חמישי 13:00 שני 6:00
+913841|מימונס אפיה בע"מ|חמישי 10:00 שני 10:00
+913844|גורי מוצרי צריכה בע"מ-אוריינט|רביעי 13:00 שני 9:00
+913870|ל.י.ב בע"מ|חמישי 12:00 שני 10:00
+913871|נוקדי המדבר בע"מ|ראשון 10:00 חמישי 15:00
+913883|אשר שיווק טבע גרינלייף בע"מ|ראשון 10:00 רביעי 12:00
+913897|בריאני בע"מ|ראשון 16:00 חמישי 16:00
+913902|מאמי קר בע"מ|ראשון 10:00 שלישי 10:00
+913906|רוצים את הטבע בע"מ|שני 12:00 שלישי 12:00
+913907|אורגניק זון בע"מ|שלישי 10:00 רביעי 10:00
+913920|טבעקום שיווק בע"מ|ראשון 10:00 שלישי 10:00
+913923|מחלבות טל טלה בע"מ|רביעי 10:00 חמישי 15:00
+913980|שקד תבור בע"מ|ראשון 10:00 שלישי 10:00
+913993|השדה מוצרים טבעיים ואורגניים בע"מ|חמישי 14:00 שני 8:00
+913997|נטורפוד בע"מ|ראשון 10:00 שלישי 10:00
+914036|דוכן גן שמואל|שני 10:00 חמישי 10:00
+914038|פודס אנד סטאף בע"מ|שלישי 10:00 ראשון 10:00
+914052|א.ל. ייצור ושיווק-מיימונס מצוננים|חמישי 10:00 שני 10:00
+914056|נטו מלינדה גבינות בוטיק|שלישי 12:00 שישי 8:00
+914092|החברה הדרומית קרוליין קוסמטיקה|רביעי 13:00 שני 9:00
+914133|דנשר (1963) בע"מ|חמישי 13:00 שני 6:00
+914139|אמברוזיה סופהרב בע"מ|ראשון 13:00 שלישי 9:00
+914182|החברה המרכזית — טרה|שני 12:00 שלישי 12:00;רביעי 12:00 חמישי 12:00;חמישי 12:00 ראשון 12:00
+914189|ק.א.שוקולד בע"מ|שני 10:00 רביעי 10:00
+914265|דני וגלית בע"מ|שני 10:00 שלישי 10:00
+914288|סלטי שמיר 2006 בע"מ-PL|שני 12:00 רביעי 12:00;רביעי 12:00 ראשון 12:00
+914291|וגה מוצרים טבעוניים בע"מ|חמישי 14:00 שני 8:00
+914317|לולי חוות גבעות עולם בע"מ|ראשון 14:00 שלישי 8:00
+914320|שניב בע"מ PL|חמישי 13:00 שני 12:00
+914330|זוגלובק-פרי ניב|ראשון 12:00 שלישי 10:00
+914333|אחים וולף שיווק מזון בני ברק בע"מ|ראשון 10:00 חמישי 10:00
+914459|אול אורגני-גרין|חמישי 14:00 שני 8:00
+914480|זוגלובק שיווק בע"מ|חמישי 14:00 שני 12:00
+914481|זוגלובק שיווק - רמת הגולן|ראשון 14:00 שני 12:00
+914482|זוגלובק שיווק - פריניב|ראשון 14:00 שני 12:00
+914483|זוגלובק שיווק - מקצועי|ראשון 14:00 שני 12:00
+914488|צוקרמן מוצרים טבעיים בע"מ|ראשון 10:00 שלישי 10:00
+914492|טמפו משקאות-בריאות|שלישי 13:00 רביעי 13:00;חמישי 13:00 ראשון 12:00
+914494|המאפה של ד"ר מרק בריאות באפייה בע"מ|שלישי 10:00 חמישי 12:00
+914606|זוגלובק נקניק - PL|ראשון 14:00 שני 12:00
+914715|תנובה - פריניב|ראשון 13:00 שני 13:00;שני 13:00 שלישי 13:00;שלישי 13:00 רביעי 13:00;שישי 13:00 ראשון 13:00
+914751|ניסוי וטעייה בע"מ|ראשון 10:00 שלישי 12:00
+914786|זוגלובק שיווק בע"מ-גרין לייט|ראשון 14:00 שני 12:00
+914838|אלטמן בריאות (פארם)|ראשון 13:00 שלישי 9:00
+914966|אלפא-ב.ד.ף בע"מ|שני 13:00 רביעי 8:00
+915055|מ.פיינגריש ושות בע"מ-PL|ראשון 13:00 חמישי 9:00
+915135|פוד קולקשן בע"מ|חמישי 14:00 שני 12:00
+915267|גלוברנדס (מכולת)|חמישי 10:00 שלישי 13:00
+915701|בית מרקחת גני-טל בע"מ|ראשון 17:00 שני 17:00;שני 17:00 שלישי 17:00;שלישי 17:00 רביעי 17:00;רביעי 17:00 חמישי 17:00;שישי 17:00 ראשון 17:00
+915733|טמפו-מי עדן|שלישי 12:00 רביעי 13:00;חמישי 12:00 ראשון 12:00
+915807|אסם נסטלה ישראל-מכולת מקורר|שלישי 15:00 רביעי 14:00;רביעי 15:00 חמישי 14:00;חמישי 15:00 ראשון 14:00
+915808|אסם נסטלה ישראל-טבעול|שלישי 15:00 רביעי 15:00;חמישי 15:00 ראשון 15:00
+920011|שוקוטרייד בע"מ|ראשון 13:00 שלישי 6:00
+920087|תנובה-טירת צבי|ראשון 13:00 שני 10:00;שלישי 13:00 רביעי 10:00
+920147|זוגלובק א|ראשון 12:00 שלישי 10:00
+920271|א.ל.ייצור שיווק תבלינים בע"מ|חמישי 10:00 שני 10:00
+920298|חברת רנדי בע"מ|רביעי 16:00 שני 7:00
+920300|מיה תעשיות מזון מ.ת.מ בע"מ|ראשון 13:00 שני 9:00
+920301|לוריאל ישראל בע"מ|ראשון 13:00 שלישי 9:00
+920395|קימברלי קלארק ישראל שיווק בע"מ|שלישי 13:00 חמישי 10:00;חמישי 13:00 שני 10:00
+920429|יקב טפרברג 1870 בע"מ|ראשון 15:00 שני 10:00
+920444|תעשיות מזון יבנה בעמ|חמישי 12:00 ראשון 8:00
+920458|ש.שסטוביץ פארם|ראשון 13:00 שלישי 6:00;שלישי 13:00 חמישי 6:00
+920507|מעדני מיקי|שלישי 12:00 רביעי 8:00;חמישי 12:00 ראשון 8:00
+920568|תבליני טעם וריח בע"מ|ראשון 13:00 שני 9:00
+920573|איתן בעמ|ראשון 13:00 חמישי 9:00
+920640|מחלבת המושבה בע"מ|ראשון 12:00 שלישי 8:00
+920665|דנאגיס-סנו קוסמטיקה|שני 13:00 רביעי 7:00;חמישי 13:00 שני 8:00
+920666|דנאגיס בעמ דנשר|חמישי 12:00 שני 6:00
+920689|אלפא קוסמטיקה בעמ|שני 13:00 רביעי 8:00
+920700|ח.נ.ה.בעמ P.L|שלישי 13:00 חמישי 9:00
+920730|מבושלת-סי.אי.פי.מבוא חורון-PL|שני 17:00 רביעי 10:00
+920810|אסם-מכולת מקורר|שלישי 15:00 רביעי 9:00;חמישי 15:00 ראשון 9:00
+921036|אשבול בע"מ|רביעי 13:00 שני 7:00
+921039|הנקל סוד בעמ|שני 12:00 שלישי 6:00;רביעי 12:00 חמישי 6:00
+921079|שקד תבל בע"מ|רביעי 13:00 ראשון 9:00
+921126|הנמל P.L|ראשון 13:00 שני 9:00
+921163|ויטה פרי הגליל (החדשה)|חמישי 13:00 שני 8:00
+921164|טמפו משקאות בע"מ-ברקן|ראשון 13:00 שני 9:00
+921169|תומר יבוא ושיווק מוצרי מזון בע"מ|שלישי 13:00 חמישי 9:00
+921180|דניה קוסמטיקס בעמ|רביעי 13:00 ראשון 9:00
+921200|דברים טובים סגל בעמ|ראשון 13:00 שני 9:00
+921228|מור-ים מרקטינג בע"מ|ראשון 13:00 שני 10:00
+921312|מרס ריגלי ישראל בע"מ|רביעי 13:00 שני 10:30
+921320|עדין בעמ|שלישי 13:00 חמישי 9:00
+921339|מוצרי איכות אמריקאים בעמ|שני 12:00 רביעי 8:00
+921366|אוריינטל פוד אימפורטרס (1992) בע"מ|ראשון 13:00 שלישי 9:00
+921377|השדה מוצרים טבעיים ואורגנים בע"מ|ראשון 13:00 שני 9:00
+921413|קרביץ לוי לירון|ראשון 13:00 שני 9:00
+921427|פינוקים (תעשיות מזון) בע"מ|שלישי 13:00 חמישי 6:00
+922013|יעקבי בעמ|חמישי 18:00 שני 8:00
+991327|הנבטים של אודי בע"מ|חמישי 15:00 שני 8:00
+991648|יבולי בר אורגני בע"מ|ראשון 15:00 שלישי 8:00;שלישי 15:00 חמישי 8:00;שישי 12:00 ראשון 8:00
+992007|אסם תעשיות מזון בע"מ|שלישי 12:00 רביעי 8:00;חמישי 12:00 ראשון 8:00
+993150|גב' יבולי בר אורגני בע"מ|ראשון 9:00 שלישי 10:00;שלישי 9:00 חמישי 10:00`;
+const WH_SUPPLIERS = {};
+WH_SUPPLIERS_RAW.split('\n').forEach(line=>{
+  const [code,name,rows]=line.trim().split('|');
+  WH_SUPPLIERS[code]={name,icon:'🚚',rows:rows.split(';').map(r=>{
+    const [od,ot,dd,dt]=r.split(' ');
+    return {od,ot,dd,dt,cat:''};
+  })};
+});
+const WH_GROUPS = [
+  {title:'מרכזי הפצה',items:WH_CENTERS},
+  {title:'ספקים ישירים',items:WH_SUPPLIERS},
+  {title:'החזרות',items:WH_RETURNS},
+];
+const WH_DATA = Object.assign({},WH_CENTERS,WH_SUPPLIERS,WH_RETURNS);
+
+function buildWhList(){
+  document.getElementById('whList').innerHTML=WH_GROUPS.map(g=>
+    `<div class="wh-group">${g.title}</div>`+
+    Object.keys(g.items).sort((a,b)=>a-b).map(code=>{
+      const w=g.items[code];
+      const spec=w.spec?`<span class="wh-spec">${w.spec}</span>`:'';
+      return `<div class="wh-drop-item" onclick="showWarehouseSchedule('${code}')"><span class="wh-num">${code}</span><span>${w.icon} ${w.name}${spec}</span></div>`;
+    }).join('')
+  ).join('');
+}
+buildWhList();
+
+function filterWh(q){
+  q=q.trim();
+  document.querySelectorAll('#whList .wh-drop-item').forEach(el=>{
+    el.style.display=el.textContent.includes(q)?'':'none';
+  });
+  document.querySelectorAll('#whList .wh-group').forEach(el=>{
+    el.style.display=q?'none':'';
+  });
+}
 
 function toggleWhDropdown(){
   document.getElementById('whDrop').classList.toggle('open');
@@ -1137,13 +1296,16 @@ function showWarehouseSchedule(code){
   const wh=WH_DATA[code];
   if(!wh) return;
   document.getElementById('whModalTitle').textContent=wh.icon+' '+wh.name;
-  document.getElementById('whTableBody').innerHTML=wh.rows.map(r=>`
-    <tr>
+  document.getElementById('whModalSpec').textContent=wh.spec||'';
+  document.getElementById('whTableBody').innerHTML=wh.rows.map(r=>{
+    const del=r.dd?`📦 ${r.dd}${r.dt?`<small>${r.dt}</small>`:''}`:'—';
+    const cat=r.cat?`<tr class="wh-last"><td colspan="3" class="wh-cat">${catHtml(r.cat,wh.name)}</td></tr>`:'';
+    return `<tr${cat?'':' class="wh-last"'}>
       <td><strong>${r.od}</strong></td>
-      <td style="color:#27AE60;font-weight:700">⏱ ${r.ot}</td>
-      <td style="color:#4338CA;font-weight:600">📦 ${r.dd}</td>
-      <td style="text-align:right;font-size:13px;color:#555">${r.cat}</td>
-    </tr>`).join('');
+      <td class="wh-time">${r.ot?'⏱ '+r.ot:'—'}</td>
+      <td class="wh-del">${del}</td>
+    </tr>${cat}`;
+  }).join('');
   document.getElementById('whOverlay').classList.add('on');
 }
 
